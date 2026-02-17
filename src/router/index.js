@@ -29,17 +29,17 @@ const router = createRouter({
           component: HeadOfFamily,
           meta: { requiresAuth: true, permission: "head-of-family-list" },
         },
-         {
-          path: "/head-of-family/:id",
-          name: "manage-head-of-family",
-          component: HeadOfFamilyManage,
-          meta: { requiresAuth: true, permission: "head-of-family-list" },
-        },
-         {
+        {
           path: "/head-of-family/create",
           name: "create-head-of-family",
           component: HeadOfFamilyCreate,
           meta: { requiresAuth: true, permission: "head-of-family-create" },
+        },
+        {
+          path: "/head-of-family/:id",
+          name: "manage-head-of-family",
+          component: HeadOfFamilyManage,
+          meta: { requiresAuth: true, permission: "head-of-family-list" },
         },
       ],
     },
@@ -57,7 +57,6 @@ const router = createRouter({
     },
   ],
 });
-
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
@@ -77,15 +76,12 @@ router.beforeEach(async (to, from, next) => {
     } else {
       next({ name: "login" });
     }
-  } 
-  else if (to.meta.requiresUnauth && token) {
+  } else if (to.meta.requiresUnauth && token) {
     next({ name: "dashboard" });
-  } 
-  else {
+  } else {
     next();
   }
 });
-
 
 // router.beforeEach(async (to, from, next) => {
 //   const authStore = useAuthStore();

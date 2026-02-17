@@ -2,6 +2,7 @@ import { handleError } from "@/helpers/errorHelper";
 
 import { axiosInstance } from "@/plugins/axios";
 import { defineStore } from "pinia";
+import router from "@/router";
 
 export const useHeadOfFamilyStore = defineStore("head-of-family", {
   state: () => ({
@@ -61,13 +62,15 @@ export const useHeadOfFamilyStore = defineStore("head-of-family", {
 
     async createHeadOfFamily(headOfFamily) {
       this.loading = true;
+      this.error = null;
+      this.success = null;
       try {
         const response = await axiosInstance.post(
           "/head-of-family",
           headOfFamily,
         );
         this.success = response.data.message;
-        router.router.push({ name: "head-of-family" });
+        // router.router.push({ name: "head-of-family" });
       } catch (error) {
         this.error = handleError(error);
       } finally {

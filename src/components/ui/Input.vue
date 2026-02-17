@@ -1,7 +1,7 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { defineProps, defineEmits, computed } from "vue";
 
-defineProps({
+const props = defineProps({
   modelValue: {
     type: String,
     required: true,
@@ -15,7 +15,7 @@ defineProps({
     default: "",
   },
   errorMessage: {
-    type: String,
+    type: [String, Array],
     default: "",
   },
   icon: {
@@ -29,35 +29,45 @@ defineProps({
 });
 
 const emit = defineEmits(["update:modelValue"]);
+
+const errorText = computed(() => {
+  if (!props.errorMessage) return "";
+  return Array.isArray(props.errorMessage)
+    ? props.errorMessage[0]
+    : props.errorMessage;
+});
 </script>
 
 <template>
   <div class="flex flex-col gap-2">
-    <div class="relative">
+    <label class="relative group w-full">
       <input
         :placeholder="placeholder"
         :type="type"
         :value="modelValue"
         @input="emit('update:modelValue', $event.target.value)"
-        class="peer w-full h-[56px] rounded-2xl pl-[48px] pr-4 border-[1.5px] border-desa-background font-medium leading-5 focus:outline-none"
-        :class="{ 'border-red-500': errorMessage }"
+        class="appearance-none outline-none w-full h-14 rounded-2xl py-4 pl-12 pr-4 font-medium placeholder:text-desa-secondary transition-all duration-300 border-2"
+        :class="
+          errorText
+            ? 'border-red-500 focus:border-red-500'
+            : 'border-desa-background focus:border-desa-black'
+        "
       />
 
-      <img
-        :src="icon"
-        alt="icon"
-        class="absolute shrink-0 size-6 top-1/2 left-4 -translate-y-1/2 opacity-0 peer-placeholder-shown:opacity-100 transition-setup"
-      />
+      <div class="absolute -translate-y-1/2 top-1/2 left-4 flex size-6">
+        <img
+          :src="icon"
+          class="size-6 hidden group-has-[:placeholder-shown]:flex pointer-events-none"
+        />
+        <img
+          :src="filledIcon"
+          class="size-6 flex group-has-[:placeholder-shown]:hidden pointer-events-none"
+        />
+      </div>
+    </label>
 
-      <img
-        :src="filledIcon"
-        alt="icon"
-        class="absolute shrink-0 size-6 top-1/2 left-4 -translate-y-1/2 opacity-100 peer-placeholder-shown:opacity-0 transition-setup"
-      />
-    </div>
-
-    <span class="text-left text-[12px] text-red-500" v-if="errorMessage">
-      {{ errorMessage[0] }}
+    <span v-if="errorText" class="text-left text-[12px]" style="color: #ef4444">
+      {{ errorText }}
     </span>
   </div>
 </template>
