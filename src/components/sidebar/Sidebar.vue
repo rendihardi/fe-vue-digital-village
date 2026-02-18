@@ -4,6 +4,8 @@ import iconChartActive from "@/assets/images/icons/chart-square-dark-green.svg";
 import iconChartInactive from "@/assets/images/icons/chart-square-secondary-green.svg";
 import iconCrownActive from "@/assets/images/icons/crown-dark-green.svg";
 import iconCrownInactive from "@/assets/images/icons/crown-secondary-green.svg";
+import iconBagActive from "@/assets/images/icons/bag-2-dark-green.svg";
+import iconBagInactive from "@/assets/images/icons/bag-2-secondary-green.svg";
 
 const sidebarItem = [
   {
@@ -13,10 +15,26 @@ const sidebarItem = [
     iconInactive: iconChartInactive,
   },
   {
-    label: "Head of Family",
+    label: "Kepala Keluarga",
     path: "/head-of-family",
     iconActive: iconCrownActive,
     iconInactive: iconCrownInactive,
+  },
+  {
+    label: "Bantuan Sosial",
+    path: "",
+    iconActive: iconBagActive,
+    iconInactive: iconBagInactive,
+    children: [
+      {
+        label: "List Bansos",
+        path: "/social-assistance",
+      },
+      {
+        label: "Pengajuan Bansos",
+        path: "/social-assistance/create",
+      },
+    ],
   },
 ];
 </script>

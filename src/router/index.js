@@ -9,6 +9,8 @@ import Cookies from "js-cookie";
 import HeadOfFamily from "@/views/head-of-family/HeadOfFamily.vue";
 import HeadOfFamilyManage from "@/views/head-of-family/HeadOfFamilyManage.vue";
 import HeadOfFamilyCreate from "@/views/head-of-family/HeadOfFamilyCreate.vue";
+import SocialAssistance from "@/views/social-assistance/SocialAssistance.vue";
+import SocialAasistanceManage from "@/views/social-assistance/SocialAasistanceManage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,6 +42,24 @@ const router = createRouter({
           name: "manage-head-of-family",
           component: HeadOfFamilyManage,
           meta: { requiresAuth: true, permission: "head-of-family-list" },
+        },
+        {
+          path: "/social-assistance",
+          name: "social-assistance",
+          component: SocialAssistance,
+          meta: { requiresAuth: true, permission: "social-assistance-list" },
+        },
+        {
+          path: "/social-assistance/create",
+          name: "create-social-assistance",
+          component: SocialAssistance,
+          meta: { requiresAuth: true, permission: "social-assistance-list" },
+        },
+        {
+          path: "/social-assistance/:id",
+          name: "manage-social-assistance",
+          component: SocialAasistanceManage,
+          meta: { requiresAuth: true, permission: "social-assistance-list" },
         },
       ],
     },

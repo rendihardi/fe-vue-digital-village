@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useHeadOfFamilyStore } from "@/stores/headOfFamily";
 import { storeToRefs } from "pinia";
+import ModalDelete from "@/components/ui/ModalDelete.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -58,7 +59,6 @@ async function handleDelete() {
       data-modal="Modal-Delete"
       class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-red"
       @click="showModalDelete = true"
-      s
     >
       <p class="font-medium text-white">Hapus Data</p>
       <img
@@ -230,7 +230,7 @@ async function handleDelete() {
           :key="family_member.id"
         >
           <p class="font-medium leading-5 text-desa-secondary">
-            {{ family_member?.relation }} ({{ index +1 }})
+            {{ family_member?.relation }} ({{ index + 1 }})
           </p>
           <div
             class="card flex flex-col rounded-2xl border border-desa-background p-4 gap-6"
@@ -836,56 +836,11 @@ async function handleDelete() {
     </div>
   </div>
 
-  <div
-    id="Modal-Delete"
-    class="modal fixed inset-0 h-screen z-40 flex bg-[#080C1ACC]"
-    v-if="showModalDelete"
-  >
-    <div
-      id="Alert"
-      class="flex flex-col w-[335px] shrink-0 rounded-2xl overflow-hidden bg-white m-auto"
-    >
-      <div class="flex items-center justify-between p-4 gap-3 bg-desa-black">
-        <p class="font-medium leading-5 text-white">Hapus Kepala Keluarga?</p>
-        <button class="btn-close-modal" @click="showModalDelete = false">
-          <img
-            src="@/assets/images/icons/close-circle-white.svg"
-            class="flex size-6 shrink-0"
-            alt="icon"
-          />
-        </button>
-      </div>
-      <div class="flex flex-col p-4 gap-3">
-        <p class="font-medium text-sm leading-[22.5px] text-desa-secondary">
-          Tindakan ini permanen dan tidak bisa dibatalkan!
-        </p>
-        <hr class="border-desa-background" />
-        <div class="flex items-center gap-3">
-          <button
-            class="btn-close-modal flex items-center h-14 rounded-2xl py-3 px-8 gap-[10px] border border-desa-background hover:bg-desa-black hover:text-white transition-setup"
-            @click="showModalDelete = false"
-          >
-            <span class="font-semibold text-sm">Batal</span>
-          </button>
-          <button
-            class="flex items-center h-14 rounded-2xl py-3 px-8 gap-[10px] bg-desa-red w-full"
-            @click="handleDelete(route.params.id)"
-            :disabled="loading"
-          >
-            <img
-              src="@/assets/images/icons/trash-white.svg"
-              class="flex size-6 shrink-0"
-              alt=""
-            />
-            <span class="font-semibold text-sm text-white" v-if="!loading"
-              >Iya Hapus</span
-            >
-            <span class="font-semibold text-sm text-white" v-if="loading"
-              >loading...</span
-            >
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <ModalDelete
+    :show="showModalDelete"
+    :title="'Hapus Kepala Keluarga'"
+    :loading="loading"
+    @close="showModalDelete = false"
+    @confirm="handleDelete"
+  />
 </template>
