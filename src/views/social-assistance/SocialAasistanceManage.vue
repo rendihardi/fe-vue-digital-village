@@ -4,6 +4,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useSocialAssistanceStore } from "@/stores/socialAssistance";
 import { storeToRefs } from "pinia";
 import ModalDelete from "@/components/ui/ModalDelete.vue";
+import { RouterLink } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
@@ -12,7 +13,7 @@ const socialAssistanceStore = useSocialAssistanceStore(); // ✅ BUAT DULU
 
 const { deleteSocialAssistance, getSocialAssistanceById } =
   socialAssistanceStore;
-const { loading } = storeToRefs(socialAssistanceStore);
+const { loading, error, success } = storeToRefs(socialAssistanceStore);
 
 const socialAssistance = ref({});
 const showModalDelete = ref(false);
@@ -79,8 +80,11 @@ const formatToClientTimeZone = (date) => {
           alt="icon"
         />
       </button>
-      <a
-        href="kd-bantuan-sosial-edit.html"
+      <RouterLink
+        :to="{
+          name: 'edit-social-assistance',
+          params: { id: socialAssistance?.id },
+        }"
         class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-black"
       >
         <p class="font-medium text-white">Ubah Data</p>
@@ -89,8 +93,26 @@ const formatToClientTimeZone = (date) => {
           class="flex size-6 shrink-0"
           alt="icon"
         />
-      </a>
+      </RouterLink>
     </div>
+  </div>
+  <div
+    v-if="success"
+    class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-2xl relative mb-4"
+    role="alert"
+  >
+    <span class="block sm:inline">{{ success }}</span>
+    <button
+      type="button"
+      @click="success = null"
+      class="absolute top-1/2 -translate-y-1/2 right-4"
+    >
+      <img
+        src="@/assets/images/icons/close-circle-white.svg"
+        class="flex size-6 shrink-0"
+        alt="icon"
+      />
+    </button>
   </div>
   <div class="flex gap-[14px]">
     <section

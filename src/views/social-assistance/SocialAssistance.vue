@@ -6,6 +6,7 @@ import CardList from "@/components/social-assistance/CardList.vue";
 import Pagination from "@/components/ui/Pagination.vue";
 import debounce from "lodash/debounce";
 import { RouterLink } from "vue-router";
+import { create } from "lodash";
 const socialAssistanceStore = useSocialAssistanceStore();
 
 const { socialAssistances, meta, loading, error, success } = storeToRefs(
@@ -50,8 +51,8 @@ watch(
 <template>
   <div id="Header" class="flex items-center justify-between">
     <h1 class="font-semibold text-2xl">List Bantuan Sosial</h1>
-    <a
-      href="kd-bantuan-sosial-add.html"
+    <RouterLink
+      :to="{ name: 'create-social-assistance' }"
       class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-dark-green"
     >
       <img
@@ -60,7 +61,7 @@ watch(
         alt="icon"
       />
       <p class="font-medium text-white">Add New</p>
-    </a>
+    </RouterLink>
   </div>
   <div
     v-if="success"

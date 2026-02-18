@@ -2,6 +2,9 @@ import { handleError } from "@/helpers/errorHelper";
 
 import { axiosInstance } from "@/plugins/axios";
 import { defineStore } from "pinia";
+import router from "@/router/index.js";
+
+// const router = useRouter();
 
 export const useSocialAssistanceStore = defineStore("social-assistance", {
   state: () => ({
@@ -67,9 +70,11 @@ export const useSocialAssistanceStore = defineStore("social-assistance", {
           socialAssistance,
         );
         this.success = response.data.message;
+        return true;
         // router.router.push({ name: "social-assistance" });
       } catch (error) {
         this.error = handleError(error);
+        return false;
       } finally {
         this.loading = false;
       }
@@ -79,14 +84,22 @@ export const useSocialAssistanceStore = defineStore("social-assistance", {
       this.error = null;
       this.success = null;
       try {
-        const response = await axiosInstance.put(
+        const response = await axiosInstance.post(
           `/social-assistance/${socialAssistance.id}`,
-          socialAssistance,
+          {
+            ...socialAssistance,
+            _method: "put",
+          },
         );
         this.success = response.data.message;
-        // router.router.push({ name: "social-assistance" });
+        // router.push({
+        //   name: "manage-social-assistance",
+        //   params: { id: socialAssistance.value.id },
+        // });
+        return true;
       } catch (error) {
         this.error = handleError(error);
+        return false;
       } finally {
         this.loading = false;
       }
