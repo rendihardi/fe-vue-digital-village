@@ -9,6 +9,8 @@ import IconKeySecondaryGreen from "@/assets/images/icons/key-secondary-green.svg
 import IconKeyBlack from "@/assets/images/icons/key-black.svg";
 import Button from "@/components/ui/Button.vue";
 import Input from "@/components/ui/Input.vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 const authStore = useAuthStore();
 const { loading, error } = storeToRefs(authStore);
@@ -20,9 +22,10 @@ const form = ref({
 });
 
 const handleSubmit = async () => {
-  await login(form.value);
+  const success = await login(form.value);
+  router.push({ name: "dashboard" });
 
-  if (error.value === "Unauthorized") {
+  if (!success) {
     form.value.password = null;
     alert("Email atau password salah");
   }
@@ -140,12 +143,7 @@ const handleSubmit = async () => {
         </div>
       </section>
 
-     <Button
-        type="submit"        
-        label="Masuk"
-        :loading="loading">
-      </Button>
-        
+      <Button type="submit" label="Masuk" :loading="loading"> </Button>
     </div>
   </form>
   <section id="Banner" class="relative flex w-full max-w-[634px]">

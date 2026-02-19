@@ -23,9 +23,10 @@ export const useAuthStore = defineStore("auth", {
         Cookies.set("token", token);
         await this.checkAuth();
         this.success = "Login successful";
-        router.push({ name: "dashboard" });
+        return true;
       } catch (error) {
         this.error = handleError(error);
+        return false;
       } finally {
         this.loading = false;
       }

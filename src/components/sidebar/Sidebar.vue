@@ -32,7 +32,7 @@ const sidebarItem = [
       },
       {
         label: "Pengajuan Bansos",
-        path: "/social-assistance/create",
+        path: "/social-assistance-recipient",
       },
     ],
   },
