@@ -77,6 +77,11 @@ const handleImageChange = (event) => {
 //   }).format(value);
 // };
 
+const setStatusAndSubmit = async (status) => {
+  socialAssistanceRecipient.value.status = status;
+  await handleSubmit();
+};
+
 const formatToClientTimeZone = (date) => {
   return dayjs(date).format("DD MMMM YYYY, HH:mm");
 };
@@ -100,6 +105,24 @@ const formatToClientTimeZone = (date) => {
       </div>
       <h1 class="font-semibold text-2xl">Manage Bansos</h1>
     </div>
+  </div>
+  <div
+    v-if="success"
+    class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-2xl relative mb-4"
+    role="alert"
+  >
+    <span class="block sm:inline">{{ success }}</span>
+    <button
+      type="button"
+      @click="success = null"
+      class="absolute top-1/2 -translate-y-1/2 right-4"
+    >
+      <img
+        src="@/assets/images/icons/close-circle-white.svg"
+        class="flex size-6 shrink-0"
+        alt="icon"
+      />
+    </button>
   </div>
   <div class="flex gap-[14px]">
     <section
@@ -444,14 +467,14 @@ const formatToClientTimeZone = (date) => {
         >
           <button
             type="submit"
-            @click="socialAssistanceRecipient.status = 'rejected'"
+            @click="setStatusAndSubmit('rejected')"
             class="flex items-center w-full justify-center gap-[10px] rounded-2xl py-4 px-6 bg-desa-red/10"
           >
             <span class="font-medium text-desa-red">Tolak</span>
           </button>
           <button
             type="submit"
-            @click="socialAssistanceRecipient.status = 'approved'"
+            @click="setStatusAndSubmit('approved')"
             class="flex items-center w-full justify-center gap-[10px] rounded-2xl py-4 px-6 bg-desa-dark-green"
           >
             <span class="font-medium text-white">Setuju</span>

@@ -36,6 +36,22 @@ const sidebarItem = [
       },
     ],
   },
+  {
+    label: "Jadwal Desa",
+    path: "",
+    iconActive: iconBagActive,
+    iconInactive: iconBagInactive,
+    children: [
+      {
+        label: "Pembangunan",
+        path: "/development",
+      },
+      {
+        label: "Event",
+        path: "/event",
+      },
+    ],
+  },
 ];
 </script>
 
