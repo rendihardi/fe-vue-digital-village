@@ -81,8 +81,8 @@ const formatToClientTimeZone = (date) => {
           alt="icon"
         />
       </button>
-      <a
-        href="kd-pembangunan-desa-edit.html"
+      <RouterLink
+        :to="{ name: 'edit-development', params: { id: development.id } }"
         class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-black"
       >
         <p class="font-medium text-white">Ubah Data</p>
@@ -91,7 +91,7 @@ const formatToClientTimeZone = (date) => {
           class="flex size-6 shrink-0"
           alt="icon"
         />
-      </a>
+      </RouterLink>
     </div>
   </div>
   <div

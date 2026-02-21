@@ -50,8 +50,8 @@ watch(
 <template>
   <div id="Header" class="flex items-center justify-between">
     <h1 class="font-semibold text-2xl">Pembangunan Desa</h1>
-    <a
-      href="kd-pembangunan-desa-add.html"
+    <RouterLink
+      :to="{ name: 'create-development' }"
       class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-dark-green"
     >
       <img
@@ -60,7 +60,7 @@ watch(
         alt="icon"
       />
       <p class="font-medium text-white">Add New</p>
-    </a>
+    </RouterLink>
   </div>
   <div
     v-if="success"

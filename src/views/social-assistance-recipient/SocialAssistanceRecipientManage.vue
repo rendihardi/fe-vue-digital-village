@@ -35,7 +35,7 @@ const fetchData = async () => {
   socialAssistanceRecipient.value = response;
   socialAssistanceRecipient.value.proof_url =
     socialAssistanceRecipient.value.proof;
-  //   socialAssistanceRecipient.value.proof = null;
+    socialAssistanceRecipient.value.proof = null;
   socialAssistanceRecipient.value.head_of_family_id =
     response.head_of_family?.id;
   socialAssistanceRecipient.value.social_assistance_id =
