@@ -45,9 +45,9 @@ async function handleDelete() {
 //   }).format(value);
 // };
 
-const formatToClientTimeZone = (date) => {
-  return dayjs(date).format("DD MMMM YYYY, HH:mm");
-};
+// const formatToClientTimeZone = (date) => {
+//   return dayjs(date).format("DD MMMM YYYY, HH:mm");
+// };
 </script>
 
 <template>
