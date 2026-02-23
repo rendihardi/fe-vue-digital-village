@@ -6,6 +6,8 @@ import iconCrownActive from "@/assets/images/icons/crown-dark-green.svg";
 import iconCrownInactive from "@/assets/images/icons/crown-secondary-green.svg";
 import iconBagActive from "@/assets/images/icons/bag-2-dark-green.svg";
 import iconBagInactive from "@/assets/images/icons/bag-2-secondary-green.svg";
+import iconBuilding4Active from "@/assets/images/icons/building-4-dark-green.svg";
+import iconBuilding4Inactive from "@/assets/images/icons/building-4-secondary-green.svg";
 
 const sidebarItem = [
   {
@@ -51,6 +53,12 @@ const sidebarItem = [
         path: "/event",
       },
     ],
+  },
+  {
+    label: "Profile",
+    path: "/profile",
+    iconActive: iconBuilding4Active,
+    iconInactive: iconBuilding4Inactive,
   },
 ];
 </script>

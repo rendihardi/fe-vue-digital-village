@@ -23,6 +23,8 @@ import Event from "@/views/event/Event.vue";
 import EventManage from "@/views/event/EventManage.vue";
 import EventEdit from "@/views/event/EventEdit.vue";
 import EventCreate from "@/views/event/EventCreate.vue";
+import Profile from "@/views/profile/Profile.vue";
+import ProfileCreate from "@/views/profile/ProfileCreate.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -167,6 +169,24 @@ const router = createRouter({
           meta: {
             requiresAuth: true,
             permission: "event-create",
+          },
+        },
+        {
+          path: "/profile",
+          name: "profile",
+          component: Profile,
+          meta: {
+            requiresAuth: true,
+            permission: "profile-menu",
+          },
+        },
+        {
+          path: "/profile/create",
+          name: "create-profile",
+          component: ProfileCreate,
+          meta: {
+            requiresAuth: true,
+            permission: "profile-create",
           },
         },
       ],
