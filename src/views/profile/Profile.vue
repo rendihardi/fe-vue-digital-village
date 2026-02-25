@@ -3,6 +3,7 @@ import { useProfileStore } from "@/stores/profile";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import { RouterLink } from "vue-router";
+import { ref } from "vue";
 
 const profileStore = useProfileStore();
 const { profiles, success } = storeToRefs(profileStore);
@@ -12,6 +13,24 @@ const fetchData = () => {
   profileStore.fetchProfile();
 };
 
+const showModalImage = ref(false);
+const selectedImage = ref(null);
+
+const selectImage = (index) => {
+  selectedImage.value = profiles.value.images[index].image;
+  showModalImage.value = true;
+};
+
+import { computed } from "vue";
+
+const firstThreeImages = computed(() => {
+  return profiles.value?.images?.slice(0, 3) || [];
+});
+
+const remainingCount = computed(() => {
+  const total = profiles.value?.images?.length || 0;
+  return total > 3 ? total - 2 : 0;
+});
 onMounted(fetchData);
 </script>
 
@@ -100,63 +119,41 @@ onMounted(fetchData);
             class="flex w-[492px] h-[300px] shrink-0 rounded-3xl bg-desa-background overflow-hidden"
           >
             <img
-              src="@/assets/images/thumbnails/desa-gallery-1.png"
+              :src="profiles.thumbnail"
               class="w-full h-full object-cover"
               alt="thumbnail"
             />
           </div>
+
           <div class="grid grid-cols-3 gap-[14px] w-[492px]">
-            <button
-              data-modal="Modal-Gallery"
-              data-gallery="@/assets/images/thumbnails/desa-gallery-2.png"
+            <div
+              v-for="(image, index) in firstThreeImages"
+              :key="index"
               class="relative"
             >
-              <div
-                class="thumbnail-selection flex w-full h-[120px] shrink-0 rounded-3xl bg-desa-background overflow-hidden"
-              >
-                <img
-                  src="@/assets/images/thumbnails/desa-gallery-2.png"
-                  class="w-full h-full object-cover"
-                  alt="thumbnail"
-                />
-              </div>
-            </button>
-            <button
-              data-modal="Modal-Gallery"
-              data-gallery="@/assets/images/thumbnails/desa-gallery-3.png"
-              class="relative"
-            >
-              <div
-                class="thumbnail-selection flex w-full h-[120px] shrink-0 rounded-3xl bg-desa-background overflow-hidden"
-              >
-                <img
-                  src="@/assets/images/thumbnails/desa-gallery-3.png"
-                  class="w-full h-full object-cover"
-                  alt="thumbnail"
-                />
-              </div>
-            </button>
-            <button
-              data-modal="Modal-Gallery"
-              data-gallery="@/assets/images/thumbnails/desa-gallery-4.png"
-              class="relative"
-            >
-              <div
-                class="thumbnail-selection flex w-full h-[120px] shrink-0 rounded-3xl bg-desa-background overflow-hidden"
-              >
-                <img
-                  src="@/assets/images/thumbnails/desa-gallery-4.png"
-                  class="w-full h-full object-cover"
-                  alt="thumbnail"
-                />
-              </div>
-              <div
-                class="absolute inset-0 rounded-3xl overflow-hidden flex flex-col items-center justify-center bg-[#001B1ACC] text-white"
-              >
-                <p class="font-semibold text-xl leading-6">2+</p>
-                <p class="font-semibold text-sm text-white">Photo</p>
-              </div>
-            </button>
+              <button class="relative w-full" @click="selectImage(index)">
+                <div
+                  class="flex w-full h-[120px] rounded-3xl bg-desa-background overflow-hidden"
+                >
+                  <img
+                    :src="image.image"
+                    class="w-full h-full object-cover"
+                    alt="thumbnail"
+                  />
+                </div>
+
+                <!-- Overlay -->
+                <div
+                  v-if="remainingCount > 0 && index === 2"
+                  class="absolute inset-0 rounded-3xl flex flex-col items-center justify-center bg-[#001B1ACC] text-white"
+                >
+                  <p class="font-semibold text-xl leading-6">
+                    {{ remainingCount }}+
+                  </p>
+                  <p class="font-semibold text-sm">Photo</p>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
         <div class="flex flex-col gap-3">
@@ -286,6 +283,57 @@ onMounted(fetchData);
           </div>
         </div>
       </section>
+    </div>
+  </div>
+  <div
+    id="Modal-Gallery"
+    class="modal fixed inset-0 flex flex-col h-screen z-40 bg-[#080C1ACC]"
+    v-if="showModalImage"
+  >
+    <div class="flex flex-col items-center justify-center m-auto">
+      <div
+        id="Main-Image-Container"
+        class="flex aspect-[805/492] w-full max-w-[805px] overflow-hidden mx-auto"
+      >
+        <img
+          :src="selectedImage"
+          class="size-full object-contain object-center"
+        />
+      </div>
+
+      <button
+        class="btn-close-modal flex items-center rounded-full border border-white/10 py-3 px-4 mx-auto mt-[30px]"
+        @click="showModalImage = false"
+      >
+        <img
+          src="@/assets/images/icons/close-circle-white.svg"
+          class="flex size-6 shrink-0"
+          alt="icon"
+        />
+        <p class="font-medium leading-5 text-white">Tutup</p>
+      </button>
+    </div>
+
+    <div
+      class="flex flex-wrap items-center w-full border border-white/10 gap-4 p-4"
+    >
+      <button
+        v-for="(image, index) in profiles.images"
+        :key="index"
+        @click="selectImage(index)"
+        class="group relative flex w-[140px] h-[120px] shrink-0 rounded-3xl bg-desa-background overflow-hidden active"
+      >
+        <img
+          :src="image.image"
+          class="size-full object-cover group-[.active]:blur"
+          alt="thumbnail"
+        />
+        <img
+          src="@/assets/images/icons/eye-white-fill.svg"
+          class="absolute hidden size-9 shrink-0 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 group-[.active]:flex"
+          alt="icon"
+        />
+      </button>
     </div>
   </div>
 </template>

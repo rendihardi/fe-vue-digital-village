@@ -3,7 +3,10 @@ import { useProfileStore } from "@/stores/profile";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import { RouterLink } from "vue-router";
+import { useRouter } from "vue-router";
 import { ref } from "vue";
+
+const router = useRouter();
 
 const profile = ref({
   thumbnail: null,
