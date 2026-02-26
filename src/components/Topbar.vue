@@ -59,17 +59,44 @@ const { logout } = authStore;
         <div
           class="flex size-14 shrink-0 rounded-full overflow-hidden bg-desa-foreshadow"
         >
+          <!-- Admin -->
           <img
+            v-if="user?.role === 'admin'"
             src="@/assets/images/photos/photo-1.png"
+            class="w-full h-full object-cover"
+            alt="photo"
+          />
+
+          <!-- Head of Family -->
+          <img
+            v-else-if="user?.role === 'head-of-family'"
+            :src="user?.head_of_family?.profile_picture"
             class="w-full h-full object-cover"
             alt="photo"
           />
         </div>
         <div class="flex flex-col gap-[6px] w-[120px] shrink-0">
-          <p class="font-semibold leading-5 w-[120px] truncate">{{user?.name}}</p>
-          <p class="font-medium text-sm text-desa-secondary">{{user?.role}}</p>
+          <p class="font-semibold leading-5 w-[120px] truncate">
+            {{ user?.name }}
+          </p>
+          <p
+            class="font-medium text-sm text-desa-secondary"
+            v-if="user.role === 'admin'"
+          >
+            Admin
+          </p>
+          <p
+            class="font-medium text-sm text-desa-secondary"
+            v-if="user.role === 'head-of-family'"
+          >
+            Kepala Keluarga
+          </p>
         </div>
-        <a @click="logout" class="flex size-6 shrink-0">
+        <a
+          @click="logout"
+          class="flex size-6 shrink-0 cursor-pointer"
+          style="cursor: pointer"
+        >
           <img
             src="@/assets/images/icons/logout-red.svg"
             class="size-6"

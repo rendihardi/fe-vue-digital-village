@@ -15,12 +15,14 @@ const sidebarItem = [
     path: "/",
     iconActive: iconChartActive,
     iconInactive: iconChartInactive,
+    permission: "dashboard-menu",
   },
   {
     label: "Kepala Keluarga",
     path: "/head-of-family",
     iconActive: iconCrownActive,
     iconInactive: iconCrownInactive,
+    permission: "head-of-family-menu",
   },
   {
     label: "Bantuan Sosial",
@@ -31,10 +33,12 @@ const sidebarItem = [
       {
         label: "List Bansos",
         path: "/social-assistance",
+        permission: "social-assistance-menu",
       },
       {
         label: "Pengajuan Bansos",
         path: "/social-assistance-recipient",
+        permission: "social-assistance-recipient-menu",
       },
     ],
   },
@@ -47,10 +51,12 @@ const sidebarItem = [
       {
         label: "Pembangunan",
         path: "/development",
+        permission: "development-menu",
       },
       {
         label: "Event",
         path: "/event",
+        permission: "event-menu",
       },
     ],
   },
@@ -59,6 +65,7 @@ const sidebarItem = [
     path: "/profile",
     iconActive: iconBuilding4Active,
     iconInactive: iconBuilding4Inactive,
+    permission: "profile-menu",
   },
 ];
 </script>

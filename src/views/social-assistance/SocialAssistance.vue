@@ -7,6 +7,9 @@ import Pagination from "@/components/ui/Pagination.vue";
 import debounce from "lodash/debounce";
 import { RouterLink } from "vue-router";
 import { create } from "lodash";
+import { can } from "@/helpers/permissionHelper";
+
+
 const socialAssistanceStore = useSocialAssistanceStore();
 
 const { socialAssistances, meta, loading, error, success } = storeToRefs(
@@ -54,6 +57,7 @@ watch(
     <RouterLink
       :to="{ name: 'create-social-assistance' }"
       class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-dark-green"
+      v-if="can('social-assistance-create')"
     >
       <img
         src="@/assets/images/icons/add-square-white.svg"

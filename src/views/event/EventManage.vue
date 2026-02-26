@@ -6,6 +6,7 @@ import { storeToRefs } from "pinia";
 import ModalDelete from "@/components/ui/ModalDelete.vue";
 import { RouterLink } from "vue-router";
 import { formatDate, formatRupiah, calculateDays } from "@/helpers/format.js";
+import { can } from "@/helpers/permissionHelper";
 
 const route = useRoute();
 const router = useRouter();
@@ -69,6 +70,7 @@ async function handleDelete() {
       <h1 class="font-semibold text-2xl">Detail Event Desa</h1>
     </div>
     <RouterLink
+      v-if="can('event-edit')"
       :to="{ name: 'edit-event', params: { id: event.id } }"
       class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-black"
     >

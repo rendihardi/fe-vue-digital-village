@@ -7,6 +7,7 @@ import Pagination from "@/components/ui/Pagination.vue";
 import debounce from "lodash/debounce";
 import { RouterLink } from "vue-router";
 import { create } from "lodash";
+import { can } from "@/helpers/permissionHelper";
 const eventStore = useEventStore();
 
 const { events, meta, loading, error, success } = storeToRefs(eventStore);
@@ -50,6 +51,7 @@ watch(
   <div id="Header" class="flex items-center justify-between">
     <h1 class="font-semibold text-2xl">Events Desa</h1>
     <RouterLink
+      v-if="can('event-create')"
       :to="{ name: 'create-event' }"
       class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-dark-green"
     >

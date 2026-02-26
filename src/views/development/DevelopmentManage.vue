@@ -6,6 +6,7 @@ import { storeToRefs } from "pinia";
 import ModalDelete from "@/components/ui/ModalDelete.vue";
 import { RouterLink } from "vue-router";
 import { formatDate, formatRupiah, calculateDays } from "@/helpers/format.js";
+import { can } from "@/helpers/permissionHelper";
 
 const route = useRoute();
 const router = useRouter();
@@ -70,6 +71,7 @@ async function handleDelete() {
     </div>
     <div class="flex items-center gap-3">
       <button
+        v-if="can('development-delete')"
         data-modal="Modal-Delete"
         class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-red"
         @click="showModalDelete = true"
@@ -82,6 +84,7 @@ async function handleDelete() {
         />
       </button>
       <RouterLink
+        v-if="can('development-edit')"
         :to="{ name: 'edit-development', params: { id: development.id } }"
         class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-black"
       >
@@ -410,7 +413,7 @@ async function handleDelete() {
               </div> -->
               <div
                 class="flex items-center gap-3 justify-end shrink-0"
-                v-if="applicant.status === 'pending'"
+                v-if="applicant.status === 'pending' && can('development-edit')"
               >
                 <button
                   class="flex items-center w-[120px] justify-center shrink-0 gap-[10px] rounded-2xl py-4 px-6 bg-desa-red/10"

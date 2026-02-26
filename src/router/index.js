@@ -211,17 +211,27 @@ router.beforeEach(async (to, from, next) => {
   const token = Cookies.get("token");
 
   if (to.meta.requiresAuth) {
-    if (token) {
-      try {
-        if (!authStore.user) {
-          await authStore.checkAuth();
-        }
+    if (!token) {
+      next({ name: "login" });
+      return;
+    }
 
-        next();
-      } catch (error) {
-        next({ name: "login" });
+    try {
+      // Pastikan user ter-load
+      if (!authStore.user) {
+        await authStore.checkAuth();
       }
-    } else {
+
+      // === CEK PERMISSION ===
+      const userPermissions = authStore.user?.permissions || [];
+
+      if (to.meta.permission && !userPermissions.includes(to.meta.permission)) {
+        next({ name: "Error 403" });
+        return;
+      }
+
+      next();
+    } catch (error) {
       next({ name: "login" });
     }
   } else if (to.meta.requiresUnauth && token) {

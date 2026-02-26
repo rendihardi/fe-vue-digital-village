@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { ref } from "vue";
+import { can } from "@/helpers/permissionHelper";
 
 const profileStore = useProfileStore();
 const { profiles, success } = storeToRefs(profileStore);
@@ -41,6 +42,7 @@ onMounted(fetchData);
         <h1 class="font-semibold text-2xl">Profile Desa</h1>
       </div>
       <RouterLink
+        v-if="can('profile-create')"
         :to="{ name: 'create-profile' }"
         class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-dark-green"
       >
@@ -73,6 +75,7 @@ onMounted(fetchData);
         <h1 class="font-semibold text-2xl">Profile Desa</h1>
       </div>
       <a
+        v-if="can('profile-edit')"
         class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-black"
       >
         <p class="font-medium text-white">Ubah Data</p>

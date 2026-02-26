@@ -2,6 +2,7 @@
 import { RouterLink, RouterView } from "vue-router";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { can } from "@/helpers/permissionHelper.js";
 const props = defineProps({
   item: {
     type: Object,
@@ -28,7 +29,11 @@ watch(isChildActive, () => {
 </script>
 
 <template>
-  <li class="group" :class="{ active: isActive }" v-if="!item.children">
+  <li
+    class="group"
+    :class="{ active: isActive }"
+    v-if="!item.children && can(item.permission)"
+  >
     <RouterLink
       :to="item.path"
       class="flex items-center h-14 gap-2 rounded-2xl p-4 group-hover:bg-desa-foreshadow group-[.active]:bg-desa-foreshadow transition-setup"
@@ -56,7 +61,9 @@ watch(isChildActive, () => {
     </RouterLink>
   </li>
 
-  <template v-if="item.children">
+  <template
+    v-if="item.children && item.children.some((child) => can(child.permission))"
+  >
     <div class="accordion group/accordion flex flex-col gap-1 w-full">
       <button
         :data-expand="`accordion-${item.label}`"

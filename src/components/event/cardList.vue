@@ -1,6 +1,10 @@
 <script setup>
 import { RouterLink } from "vue-router";
 import { formatDate, formatRupiah } from "@/helpers/format.js";
+import { useAuthStore } from "@/stores/auth";
+import { storeToRefs } from "pinia";
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 defineProps({
   item: {
     type: Object,
@@ -52,7 +56,14 @@ defineProps({
         :to="{ name: 'manage-event', params: { id: item?.id } }"
         class="flex items-center shrink-0 gap-[10px] rounded-2xl py-4 px-6 bg-desa-black"
       >
-        <span class="font-medium text-white">Manage</span>
+        <span class="font-medium text-white" v-if="user.role === 'admin'"
+          >Manage</span
+        >
+        <span
+          class="font-medium text-white"
+          v-if="user.role === 'head-of-family'"
+          >Detail</span
+        >
       </RouterLink>
     </div>
     <hr class="border-desa-background" />
@@ -86,7 +97,7 @@ defineProps({
         </div>
         <div class="flex flex-col gap-1">
           <p class="font-semibold text-lg leading-5 text-desa-blue">
-            {{ item.event_participants?.length??0 }} Warga
+            {{ item.event_participants?.length ?? 0 }} Warga
           </p>
           <p class="font-medium text-sm text-desa-secondary">
             Total Partisipasi

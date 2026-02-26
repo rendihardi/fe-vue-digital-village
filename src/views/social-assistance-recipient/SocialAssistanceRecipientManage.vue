@@ -5,7 +5,15 @@ import { useSocialAssistanceRecipientStore } from "@/stores/socialAssistanceReci
 import { storeToRefs } from "pinia";
 import ModalDelete from "@/components/ui/ModalDelete.vue";
 import { RouterLink } from "vue-router";
-import { parseRupiah, formatRupiah } from "@/helpers/format.js";
+import {
+  parseRupiah,
+  formatRupiah,
+  formatToClientTimezone,
+} from "@/helpers/format.js";
+
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 
 const route = useRoute();
 const router = useRouter();
@@ -35,7 +43,7 @@ const fetchData = async () => {
   socialAssistanceRecipient.value = response;
   socialAssistanceRecipient.value.proof_url =
     socialAssistanceRecipient.value.proof;
-    socialAssistanceRecipient.value.proof = null;
+  socialAssistanceRecipient.value.proof = null;
   socialAssistanceRecipient.value.head_of_family_id =
     response.head_of_family?.id;
   socialAssistanceRecipient.value.social_assistance_id =
@@ -254,6 +262,7 @@ const formatToClientTimeZone = (date) => {
     </section>
     <section
       class="flex flex-col flex-1 h-fit shrink-0 rounded-3xl p-6 gap-6 bg-white"
+      v-if="user.role === 'admin'"
     >
       <p class="font-medium leading-5 text-desa-secondary">Detail Pengajuan</p>
       <div class="flex items-center gap-3 w-[302px] shrink-0">
@@ -481,6 +490,129 @@ const formatToClientTimeZone = (date) => {
           </button>
         </div>
       </form>
+    </section>
+    <section v-if="user.role === 'head-of-family'">
+      <div class="flex-1 flex flex-col h-fit gap-[14px] w-[418px]">
+        <div class="rounded-2xl bg-white p-6 flex flex-col gap-6">
+          <section
+            id="Status-Pengajuan"
+            class="flex items-center justify-between"
+          >
+            <h2
+              class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+            >
+              Status Pengajuan
+            </h2>
+            <div class="group menunggu">
+              <span
+                v-if="socialAssistanceRecipient.status === 'pending'"
+                class="flex rounded-full py-[12px] w-[100px] justify-center bg-desa-yellow text-white font-semibold text-xs leading-[15px] shrink-0"
+                >PENDING</span
+              >
+              <span
+                v-if="socialAssistanceRecipient.status === 'rejected'"
+                class="flex rounded-full py-[12px] w-[100px] justify-center bg-desa-red text-white font-semibold text-xs leading-[15px] shrink-0"
+                >REJECTED</span
+              >
+              <span
+                v-if="socialAssistanceRecipient.status === 'approved'"
+                class="flex rounded-full py-[12px] w-[100px] justify-center bg-desa-dark-green text-white font-semibold text-xs leading-[15px] shrink-0"
+                >APPROVED</span
+              >
+            </div>
+          </section>
+          <hr class="border-desa-background" />
+          <section id="Bukti-Menerima-Bansos" class="flex flex-col gap-4">
+            <h2
+              class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+            >
+              Bukti Menerima Bansos
+            </h2>
+            <div
+              class="relative flex justify-center items-center w-full h-[230px] overflow-hidden rounded-2xl"
+            >
+              <div
+                class="square-dashed w-full h-[230px] flex justify-center items-center"
+              >
+                <p
+                  class="text-center w-[240px] font-medium text-xs leading-[19.2px] text-[#ACB9BB]"
+                >
+                  Gambar akan muncul jika status pengajuan sudah berhasil 😉
+                </p>
+              </div>
+              <img
+                v-if="socialAssistanceRecipient.status === 'approved'"
+                :src="socialAssistanceRecipient.proof"
+                alt="image"
+                class="bukti-menerima-bansos absolute left-0 top-0 w-full h-full object-cover"
+              />
+            </div>
+          </section>
+        </div>
+        <div class="flex flex-col gap-6 rounded-2xl bg-white p-6">
+          <section id="Detail Pengajuan" class="flex flex-col gap-6">
+            <h2
+              class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+            >
+              Detail Pengajuan
+            </h2>
+            <div class="point flex items-center gap-3">
+              <div class="p-[14px] shrink-0 bg-desa-foreshadow rounded-2xl">
+                <img
+                  src="@/assets/images/icons/receive-square-2-dark-green.svg"
+                  alt="icon"
+                  class="size-6 shrink-0"
+                />
+              </div>
+              <div class="flex flex-col gap-1">
+                <p
+                  class="font-semibold text-lg leading-[22.5px] text-desa-dark-green"
+                >
+                  Rp.{{ formatRupiah(socialAssistanceRecipient.amount) }}
+                </p>
+                <h3
+                  class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                >
+                  Nominal Pengajuan
+                </h3>
+              </div>
+            </div>
+            <hr class="border-desa-background" />
+            <div class="point flex items-center gap-3">
+              <div class="p-[14px] shrink-0 bg-desa-foreshadow rounded-2xl">
+                <img
+                  src="@/assets/images/icons/calendar-2-dark-green.svg"
+                  alt="icon"
+                  class="size-6 shrink-0"
+                />
+              </div>
+              <div class="flex flex-col gap-1">
+                <p class="font-semibold text-lg leading-[22.5px]">
+                  {{
+                    formatToClientTimezone(socialAssistanceRecipient.created_at)
+                  }}
+                </p>
+                <h3
+                  class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                >
+                  Tanggal Pengajuan
+                </h3>
+              </div>
+            </div>
+            <hr class="border-desa-background" />
+          </section>
+          <section id="Pesan-Pengajuan" class="flex flex-col gap-1">
+            <h2
+              class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+            >
+              Pesan Pengajuan:
+            </h2>
+            <p class="font-medium leading-8">
+              {{ socialAssistanceRecipient.reason }}
+            </p>
+          </section>
+        </div>
+      </div>
     </section>
   </div>
 </template>

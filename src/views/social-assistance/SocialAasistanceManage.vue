@@ -5,6 +5,7 @@ import { useSocialAssistanceStore } from "@/stores/socialAssistance";
 import { storeToRefs } from "pinia";
 import ModalDelete from "@/components/ui/ModalDelete.vue";
 import { RouterLink } from "vue-router";
+import { can } from "@/helpers/permissionHelper.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -69,6 +70,7 @@ const formatToClientTimeZone = (date) => {
     </div>
     <div class="flex items-center gap-3">
       <button
+        v-if="can('social-assistance-delete')"
         data-modal="Modal-Delete"
         class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-red"
         @click="showModalDelete = true"
@@ -81,6 +83,7 @@ const formatToClientTimeZone = (date) => {
         />
       </button>
       <RouterLink
+        v-if="can('social-assistance-edit')"
         :to="{
           name: 'edit-social-assistance',
           params: { id: socialAssistance?.id },
