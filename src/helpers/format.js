@@ -1,5 +1,10 @@
 import numeral from "numeral";
 import { DateTime } from "luxon";
+import dayjs from "dayjs";
+
+export function getAge(dob) {
+  return dayjs().diff(dayjs(dob), "year");
+}
 
 export function formatRupiah(value) {
   return numeral(value).format("0,0.[.]00");

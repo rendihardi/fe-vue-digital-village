@@ -55,7 +55,7 @@ const formatRupiah = (value) => {
         class="flex items-center shrink-0 gap-[10px] rounded-2xl py-4 px-6 bg-desa-black"
       >
         <span class="font-medium text-white" v-if="user.role === 'admin'"
-          >Detail</span
+          >Manage</span
         >
         <span
           class="font-medium text-white"

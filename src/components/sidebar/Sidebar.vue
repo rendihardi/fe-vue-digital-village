@@ -25,6 +25,13 @@ const sidebarItem = [
     permission: "head-of-family-menu",
   },
   {
+    label: "Anggota Keluarga",
+    path: "/family-member",
+    iconActive: iconCrownActive,
+    iconInactive: iconCrownInactive,
+    permission: "family-member-menu",
+  },
+  {
     label: "Bantuan Sosial",
     path: "",
     iconActive: iconBagActive,

@@ -1,52 +1,114 @@
 <script setup>
 import { useDashboardStore } from "@/stores/dashboard.js";
 import { storeToRefs } from "pinia";
-import { onMounted } from "vue";
+import { watch, nextTick } from "vue";
 import { Chart } from "chart.js/auto";
 import { useAuthStore } from "@/stores/auth";
+import { useFamilyMemberStore } from "@/stores/familyMember";
+import { useDevelopmentApplicantStore } from "@/stores/developmentApplicant";
+import { useEventParticipantStore } from "@/stores/eventParticipant";
+import { useSocialAssistanceRecipientStore } from "@/stores/socialAssistanceRecipient";
+import { formatRupiah, formatToClientTimezone, getAge } from "@/helpers/format";
 
+// ================= STORE INIT =================
 const authStore = useAuthStore();
+const dashboardStore = useDashboardStore();
+const familyMemberStore = useFamilyMemberStore();
+// const developmentApplicantStore = useDevelopmentApplicantStore();
+const eventParticipantStore = useEventParticipantStore();
+const socialAssistanceRecipientStore = useSocialAssistanceRecipientStore();
+
+// ================= STORE TO REFS =================
 const { user } = storeToRefs(authStore);
 
-const dashboardStore = useDashboardStore();
+const { dashboardData, loading: loadingDashboard } =
+  storeToRefs(dashboardStore);
 
-const { dashboardData, loading } = storeToRefs(dashboardStore);
+const { familyMembers, loading: loadingFamilyMember } =
+  storeToRefs(familyMemberStore);
+
+// const { developmentApplicants, loading: loadingDevelopmentApplicant } =
+//   storeToRefs(developmentApplicantStore);
+
+const { eventParticipants, loading: loadingEventParticipant } = storeToRefs(
+  eventParticipantStore,
+);
+
+const {
+  socialAssistanceRecipients,
+  loading: loadingSocialAssistanceRecipient,
+} = storeToRefs(socialAssistanceRecipientStore);
+
+// ================= ACTIONS =================
 const { fetchDashboardData } = dashboardStore;
+const { fetchFamilyMembers } = familyMemberStore;
+// const { fetchDevelopmentApplicant } = developmentApplicantStore;
+const { fetchEventParticipant } = eventParticipantStore;
+const { fetchSocialAssistanceRecipient } = socialAssistanceRecipientStore;
 
-const getResidentStatistic = () => {
-  const chart = document.getElementById("myChart");
+// ================= CHART =================
+let chartInstance = null;
 
-  new Chart(chart, {
+const getResidentStatistic = async () => {
+  await nextTick();
+
+  const canvas = document.getElementById("myChart");
+  if (!canvas) return;
+
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  chartInstance = new Chart(canvas, {
     type: "doughnut",
     data: {
       datasets: [
         {
           data: [114210, 97200, 24300, 7290],
           backgroundColor: ["#34613A", "#8EBD55", "#FA7139", "#FBAD48"],
+          spacing: 2,
+          borderRadius: 6,
         },
       ],
     },
     options: {
-      scales: {
-        display: false,
+      plugins: {
+        legend: { display: false },
       },
-      datasets: {
-        doughnut: {
-          spacing: 2,
-          borderRadius: 6,
-          cutout: "69%",
-        },
-      },
+      cutout: "69%",
     },
   });
 };
 
-onMounted(() => {
-  if (user.role === "admin") {
-    fetchDashboardData();
-    getResidentStatistic();
-  }
-});
+// ================= WATCH USER =================
+watch(
+  user,
+  async (newUser) => {
+    if (!newUser) return;
+
+    try {
+      // ===== ADMIN =====
+      if (newUser.role === "admin") {
+        await Promise.all([fetchDashboardData()]);
+
+        await getResidentStatistic();
+      }
+
+      // ===== HEAD OF FAMILY =====
+      if (newUser.role === "head-of-family") {
+        await Promise.all([
+          fetchFamilyMembers(),
+          fetchSocialAssistanceRecipient(),
+          // fetchDevelopmentApplicant(),
+          fetchEventParticipant(),
+        ]);
+      }
+    } catch (error) {
+      console.error("Dashboard error:", error);
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -890,6 +952,609 @@ onMounted(() => {
           </div>
         </div>
       </section>
+    </div>
+  </div>
+  <div id="dashboard-head-of-family" v-if="user.role === 'head-of-family'">
+    <header class="mb-4">
+      <h1 class="font-semibold text-2xl leading-[30px]">
+        Rumah Tangga Statistic
+      </h1>
+    </header>
+    <div class="flex gap-[14px]">
+      <div class="flex flex-col gap-[14px] shrink-0 w-[calc(463/1000*100%)]">
+        <section
+          id="Bantuan-Sosial"
+          class="flex flex-col gap-6 p-6 gradient-vertical rounded-2xl"
+        >
+          <img
+            src="@/assets/images/icons/bag-orange-background.svg"
+            alt="icon"
+            class="size-[86px] shrink-0"
+          />
+          <div class="flex flex-col gap-[12px]">
+            <h2 class="font-medium text-sm leading-[17.5px] text-[#DEFF6E]">
+              — Bantuan Sosial
+            </h2>
+            <h3 class="font-semibold text-2xl leading-[30px] text-white">
+              Dari Desa Untuk Warga ❤️
+            </h3>
+            <p class="leading-6 text-white">
+              Terima bantuan sosial dari desa yang tepat untuk kebutuhan
+              spesifikmu setiap saat. 🫶🏻
+            </p>
+          </div>
+          <RouterLink :to="{ name: 'social-assistance' }">
+            <div
+              class="flex items-center justify-between px-4 py-[18px] bg-white rounded-2xl"
+            >
+              <p class="font-medium leading-5 text-desa-dark-green">
+                Ajukan Bantuan Sosial
+              </p>
+              <img
+                src="@/assets/images/icons/add-square-dark-green.svg"
+                alt="icon"
+                class="size-6 shrink-0"
+              />
+            </div>
+          </RouterLink>
+        </section>
+        <section
+          id="Events-Joined"
+          class="flex flex-col gap-6 p-6 bg-white rounded-2xl"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-[6px]">
+              <strong class="font-semibold text-[32px] leading-[40px]">{{
+                eventParticipants.length
+              }}</strong>
+              <h2 class="font-medium leading-5 text-desa-secondary">
+                Events Joined
+              </h2>
+            </div>
+            <div
+              class="p-[12px] rounded-full flex justify-center items-center bg-desa-foreshadow shrink-0"
+            >
+              <img
+                src="@/assets/images/icons/calendar-2-dark-green.svg"
+                alt="icon"
+                class="size-6 shrink-0"
+              />
+            </div>
+          </div>
+          <hr class="border-desa-background" />
+          <div
+            id="Recent-Event"
+            class="flex flex-col gap-4"
+            v-for="event in eventParticipants.slice(0, 3)"
+          >
+            <h3 class="font-medium leading-5 text-desa-secondary">
+              Recent Events
+            </h3>
+            <div
+              class="event py-4 rounded-2xl border border-desa-background flex flex-col gap-4"
+            >
+              <div class="time px-4 flex items-center justify-between">
+                <p
+                  class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                >
+                  {{ formatToClientTimezone(event.event.date) }}
+                </p>
+                <img
+                  src="@/assets/images/icons/calendar-2-secondary-green.svg"
+                  alt="icon"
+                  class="size-[18px] shrink-0"
+                />
+              </div>
+              <hr class="border-desa-background mx-4" />
+              <div class="card px-4 flex items-center gap-3">
+                <div
+                  class="flex items-center justify-center w-[100px] h-[80px] shrink-0 rounded-2xl overflow-auto"
+                >
+                  <img
+                    src="@/assets/images/thumbnails/kk-dashboard-1.png"
+                    alt="image"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+                <div class="flex flex-col gap-[6px] w-full">
+                  <h4
+                    class="font-semibold text-lg leading-[22.5px] line-clamp-1"
+                  >
+                    {{ event.event.name }}
+                  </h4>
+                  <div class="flex items-center gap-1">
+                    <img
+                      src="@/assets/images/icons/profile-2user-orange.svg"
+                      alt="icon"
+                      class="size-[18px] shrink-0"
+                    />
+                    <p
+                      class="font-semibold text-sm leading-[17.5px] text-desa-orange"
+                    >
+                      {{ event.quantity }}
+                    </p>
+                    <p
+                      class="font-semibold text-sm leading-[17.5px] text-desa-orange line-clamp-1"
+                    >
+                      Jumlah Ticket
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <hr class="border-desa-background" />
+              <div class="harga-event px-4 flex items-center justify-between">
+                <p
+                  class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                >
+                  Harga Event:
+                </p>
+                <p class="font-medium leading-5 text-desa-red">
+                  Rp{{ formatRupiah(event.event.price) }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <RouterLink :to="{ name: 'event' }">
+            <div
+              class="rounded-2xl py-[18px] bg-desa-dark-green flex justify-center items-center"
+            >
+              <p class="font-medium leading-5 text-white">View Details</p>
+            </div>
+          </RouterLink>
+        </section>
+        <section
+          id="Pembangunan"
+          class="flex flex-col gap-6 p-6 bg-white rounded-2xl"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-[6px]">
+              <strong class="font-semibold text-[32px] leading-[40px]"
+                >5 Applicants</strong
+              >
+              <h2 class="font-medium leading-5 text-desa-secondary">
+                Pembangunan
+              </h2>
+            </div>
+            <div
+              class="p-[12px] rounded-full flex justify-center items-center bg-desa-foreshadow shrink-0"
+            >
+              <img
+                src="@/assets/images/icons/calendar-2-dark-green.svg"
+                alt="icon"
+                class="size-6 shrink-0"
+              />
+            </div>
+          </div>
+          <hr class="border-desa-background" />
+          <div id="Recent-Applicants" class="flex flex-col gap-4">
+            <h3 class="font-medium leading-5 text-desa-secondary">
+              Recent Applicants
+            </h3>
+            <div
+              class="applicant p-4 rounded-2xl border border-desa-background flex flex-col gap-4"
+            >
+              <div class="flex items-center justify-between">
+                <div
+                  class="flex items-center justify-center w-[100px] h-[80px] shrink-0 rounded-2xl overflow-hidden"
+                >
+                  <img
+                    src="@/assets/images/thumbnails/kk-dashboard-3.png"
+                    alt="image"
+                    class="size-full shrink-0"
+                  />
+                </div>
+                <div class="group menunggu">
+                  <span
+                    class="group-[&.menunggu]:flex hidden rounded-full py-[12px] w-[100px] justify-center bg-desa-yellow text-white font-semibold text-xs leading-[15px] shrink-0"
+                    >MENUNGGU</span
+                  >
+                  <span
+                    class="group-[&.ditolak]:flex hidden rounded-full py-[12px] w-[100px] justify-center bg-desa-red text-white font-semibold text-xs leading-[15px] shrink-0"
+                    >DITOLAK</span
+                  >
+                  <span
+                    class="group-[&.diterima]:flex hidden rounded-full py-[12px] w-[100px] justify-center bg-desa-dark-green text-white font-semibold text-xs leading-[15px] shrink-0"
+                    >DITERIMA</span
+                  >
+                </div>
+              </div>
+              <div class="flex flex-col gap-1">
+                <h5 class="font-semibold text-lg leading-[22.5px] line-clamp-1">
+                  Pembangunan Puskesmas Desa
+                </h5>
+                <div class="flex gap-1">
+                  <p class="font-medium leading-5 text-desa-secondary">
+                    Penanggung Jawab:
+                  </p>
+                  <p class="font-semibold leading-5 text-desa-dark-green">
+                    Uzumaki Asep
+                  </p>
+                </div>
+              </div>
+              <hr class="border-desa-background" />
+              <div
+                id="Tanggal-Pelaksanaan"
+                class="flex items-center gap-[12px]"
+              >
+                <div
+                  class="size-[48px] shrink-0 rounded-full bg-desa-foreshadow flex items-center justify-center"
+                >
+                  <img
+                    src="@/assets/images/icons/calendar-2-dark-green.svg"
+                    alt="icon"
+                    class="size-6 shrink-0"
+                  />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <p class="font-semibold leading-5 text-desa-dark-green">
+                    3 Jan 2025
+                  </p>
+                  <h6
+                    class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                  >
+                    Tanggal Pelaksanaan
+                  </h6>
+                </div>
+              </div>
+              <hr class="border-desa-background" />
+              <div id="Waktu-Pelaksanaan" class="flex items-center gap-[12px]">
+                <div
+                  class="size-[48px] shrink-0 rounded-full bg-desa-foreshadow flex items-center justify-center"
+                >
+                  <img
+                    src="@/assets/images/icons/timer-dark-green.svg"
+                    alt="icon"
+                    class="size-6 shrink-0"
+                  />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <p class="font-semibold leading-5 text-desa-dark-green">
+                    24 Hari
+                  </p>
+                  <h6
+                    class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                  >
+                    Waktu Pelaksanaan
+                  </h6>
+                </div>
+              </div>
+            </div>
+            <div
+              class="applicant p-4 rounded-2xl border border-desa-background flex flex-col gap-4"
+            >
+              <div class="flex items-center justify-between">
+                <div
+                  class="flex items-center justify-center w-[100px] h-[80px] shrink-0 rounded-2xl overflow-hidden"
+                >
+                  <img
+                    src="@/assets/images/thumbnails/kk-dashboard-4.png"
+                    alt="image"
+                    class="size-full shrink-0"
+                  />
+                </div>
+                <div class="group diterima">
+                  <span
+                    class="group-[&.menunggu]:flex hidden rounded-full py-[12px] w-[100px] justify-center bg-desa-yellow text-white font-semibold text-xs leading-[15px] shrink-0"
+                    >MENUNGGU</span
+                  >
+                  <span
+                    class="group-[&.ditolak]:flex hidden rounded-full py-[12px] w-[100px] justify-center bg-desa-red text-white font-semibold text-xs leading-[15px] shrink-0"
+                    >DITOLAK</span
+                  >
+                  <span
+                    class="group-[&.diterima]:flex hidden rounded-full py-[12px] w-[100px] justify-center bg-desa-dark-green text-white font-semibold text-xs leading-[15px] shrink-0"
+                    >DITERIMA</span
+                  >
+                </div>
+              </div>
+              <div class="flex flex-col gap-1">
+                <h5 class="font-semibold text-lg leading-[22.5px] line-clamp-1">
+                  Pembangunan Jalanan Utama
+                </h5>
+                <div class="flex gap-1">
+                  <p class="font-medium leading-5 text-desa-secondary">
+                    Penanggung Jawab:
+                  </p>
+                  <p class="font-semibold leading-5 text-desa-dark-green">
+                    Uzumaki Asep
+                  </p>
+                </div>
+              </div>
+              <hr class="border-desa-background" />
+              <div
+                id="Tanggal-Pelaksanaan"
+                class="flex items-center gap-[12px]"
+              >
+                <div
+                  class="size-[52px] shrink-0 rounded-2xl bg-desa-foreshadow flex items-center justify-center"
+                >
+                  <img
+                    src="@/assets/images/icons/calendar-2-dark-green.svg"
+                    alt="icon"
+                    class="size-6 shrink-0"
+                  />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <p class="font-semibold leading-5 text-desa-dark-green">
+                    3 Jan 2025
+                  </p>
+                  <h6
+                    class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                  >
+                    Tanggal Pelaksanaan
+                  </h6>
+                </div>
+              </div>
+              <hr class="border-desa-background" />
+              <div id="Waktu-Pelaksanaan" class="flex items-center gap-[12px]">
+                <div
+                  class="size-[52px] shrink-0 rounded-2xl bg-desa-foreshadow flex items-center justify-center"
+                >
+                  <img
+                    src="@/assets/images/icons/timer-dark-green.svg"
+                    alt="icon"
+                    class="size-6 shrink-0"
+                  />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <p class="font-semibold leading-5 text-desa-dark-green">
+                    24 Hari
+                  </p>
+                  <h6
+                    class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                  >
+                    Waktu Pelaksanaan
+                  </h6>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="flex flex-col gap-[14px] flex-1">
+        <section
+          id="Anggota-Keluarga"
+          class="flex flex-col gap-6 p-6 bg-white rounded-2xl"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-[6px]">
+              <strong class="font-semibold text-[32px] leading-[40px]">{{
+                familyMembers?.length ?? 0
+              }}</strong>
+              <h2 class="font-medium leading-5 text-desa-secondary">
+                Anggota Keluarga
+              </h2>
+            </div>
+            <div
+              class="p-[16px] rounded-full flex justify-center items-center bg-desa-foreshadow shrink-0"
+            >
+              <img
+                src="@/assets/images/icons/profile-2user-dark-green.svg"
+                alt="icon"
+                class="size-6 shrink-0"
+              />
+            </div>
+          </div>
+          <div class="box h-[1px] w-full"></div>
+          <div
+            class="people flex flex-col gap-[14px]"
+            v-for="(family, index) in familyMembers.slice(0, 3)"
+            :key="index"
+          >
+            <h3 class="font-medium leading-5 text-desa-secondary">
+              {{ family.relation }} ({{ index + 1 }})
+            </h3>
+            <div
+              class="rounded-2xl border border-desa-background p-4 flex flex-col gap-6"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-[12px]">
+                  <div
+                    class="flex size-[64px] shrink-0 rounded-full overflow-hidden bg-desa-foreshadow"
+                  >
+                    <img
+                      :src="family.profile_picture"
+                      class="w-full h-full object-cover"
+                      alt="photo"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-[6px]">
+                    <h4
+                      class="font-semibold text-lg leading-[22.5px] line-clamp-1"
+                    >
+                      {{ family.user?.name }}
+                    </h4>
+                    <div class="flex items-center gap-1">
+                      <img
+                        src="@/assets/images/icons/briefcase-secondary-green.svg"
+                        alt="icon"
+                        class="size-[18px] shrink-0"
+                      />
+                      <p
+                        class="font-medium leading-5 text-desa-secondary line-clamp-1"
+                      >
+                        {{ family.occupation }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <p class="font-medium leading-5">
+                  {{ getAge(family?.date_of_birth) }} tahun
+                </p>
+              </div>
+              <hr class="border-desa-foreshadow" />
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1">
+                  <img
+                    src="@/assets/images/icons/keyboard-secondary-green.svg"
+                    alt="icon"
+                    class="size-[18px] shrink-0"
+                  />
+                  <p
+                    class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                  >
+                    Nomor Induk Kependudukan:
+                  </p>
+                </div>
+                <p class="font-medium leading-5">
+                  {{ family.identity_number }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <RouterLink :to="{ name: 'family-member' }">
+            <div
+              class="rounded-2xl py-[18px] bg-desa-dark-green flex justify-center items-center"
+            >
+              <p class="font-medium leading-5 text-white">View Details</p>
+            </div>
+          </RouterLink>
+        </section>
+        <section
+          id="Pengajuan-Bantuan-Sosial"
+          class="flex flex-col gap-6 p-6 bg-white rounded-2xl"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-[6px]">
+              <strong class="font-semibold text-[32px] leading-[40px]"
+                >{{ socialAssistanceRecipients?.length ?? 0 }} Pengajuan</strong
+              >
+              <h2 class="font-medium leading-5 text-desa-secondary">
+                Bantuan Sosial
+              </h2>
+            </div>
+            <div
+              class="p-[16px] rounded-full flex justify-center items-center bg-desa-foreshadow shrink-0"
+            >
+              <img
+                src="@/assets/images/icons/note-dark-green.svg"
+                alt="icon"
+                class="size-6 shrink-0"
+              />
+            </div>
+          </div>
+          <div class="box h-[1px] w-full"></div>
+          <h3 class="font-medium leading-5 text-desa-secondary">
+            Recent Bansos
+          </h3>
+          <div
+            class="people flex flex-col gap-4"
+            v-for="socialAssistance in socialAssistanceRecipients.slice(0, 3)"
+          >
+            <div
+              class="bantuan p-4 rounded-2xl border border-desa-background flex flex-col gap-4"
+            >
+              <div class="flex items-center justify-between">
+                <p
+                  class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                >
+                  {{ formatToClientTimezone(socialAssistance?.created_at) }}
+                </p>
+                <img
+                  src="@/assets/images/icons/calendar-2-secondary-green.svg"
+                  alt="icon"
+                  class="size-[18px] shrink-0"
+                />
+              </div>
+              <hr class="border-desa-background" />
+              <h4 class="font-semibold text-lg leading-[22.5px]">
+                {{ socialAssistance.social_assistance?.name }}
+              </h4>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="size-[52px] shrink-0 rounded-2xl flex justify-center items-center bg-desa-foreshadow"
+                  >
+                    <img
+                      src="@/assets/images/icons/money-dark-green.svg"
+                      alt="icon"
+                      class="size-6 shrink-0"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-[6px]">
+                    <h5 class="font-semibold text-lg leading-[22.5px]">
+                      Rp{{ formatRupiah(socialAssistance.amount) }}
+                    </h5>
+                    <p
+                      class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                    >
+                      Nominal Pengajuan
+                    </p>
+                  </div>
+                </div>
+                <div class="group menunggu">
+                  <span
+                    v-if="socialAssistance.status === 'pending'"
+                    class="flex rounded-full py-[12px] w-[100px] justify-center bg-desa-yellow text-white font-semibold text-xs leading-[15px] shrink-0"
+                    >PENDING</span
+                  >
+                  <span
+                    v-if="socialAssistance.status === 'rejected'"
+                    class="flex rounded-full py-[12px] w-[100px] justify-center bg-desa-red text-white font-semibold text-xs leading-[15px] shrink-0"
+                    >REJECTED</span
+                  >
+                  <span
+                    v-if="socialAssistance.status === 'approved'"
+                    class="flex rounded-full py-[12px] w-[100px] justify-center bg-desa-dark-green text-white font-semibold text-xs leading-[15px] shrink-0"
+                    >APPROVED</span
+                  >
+                </div>
+              </div>
+              <hr class="border-desa-background" />
+              <div class="flex items-center justify-between">
+                <p
+                  class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+                >
+                  Nominal Pengajuan:
+                </p>
+                <p class="font-medium leading-5 text-desa-red">
+                  Rp{{ formatRupiah(socialAssistance.amount) }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <RouteLink :to="{ name: 'social-assistance' }">
+            <div
+              class="rounded-2xl py-[18px] bg-desa-dark-green flex justify-center items-center"
+            >
+              <p class="font-medium leading-5 text-white">View Details</p>
+            </div>
+          </RouteLink>
+        </section>
+        <section
+          id="Unduh-Rumah-Tangga-Stat"
+          class="rounded-2xl gradient-horizontal pt-[32px] px-[32px] pb-[34px] flex flex-col gap-[32px]"
+        >
+          <div class="flex items-center gap-4">
+            <img
+              src="@/assets/images/icons/document-download-orange-background.svg"
+              alt="icon"
+              class="size-[86px] shrink-0"
+            />
+            <div class="flex flex-col gap-[6px]">
+              <h2 class="font-medium text-sm leading-[17.5px] text-desa-lime">
+                — Unduh Rumah Tangga Stat
+              </h2>
+              <strong class="font-semibold text-2xl leading-[30px] text-white"
+                >Statistik Rumah Tangga</strong
+              >
+            </div>
+          </div>
+          <button
+            type="button"
+            class="flex items-center justify-between px-4 py-[18px] bg-white rounded-2xl"
+          >
+            <p class="font-medium leading-5 text-desa-dark-green">
+              Download Laporan
+            </p>
+            <img
+              src="@/assets/images/icons/receive-square-dark-green.svg"
+              alt="icon"
+              class="size-6 shrink-0"
+            />
+          </button>
+        </section>
+      </div>
     </div>
   </div>
 </template>
