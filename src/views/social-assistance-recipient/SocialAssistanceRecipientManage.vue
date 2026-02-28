@@ -40,6 +40,19 @@ const showModalDelete = ref(false);
 
 const fetchData = async () => {
   const response = await getSocialAssistanceRecipientById(route.params.id);
+
+  //   socialAssistanceRecipient.value = {
+  //   id: response.id,
+  //   social_assistance_id: response.social_assistance?.id ?? "",
+  //   head_of_family_id: response.head_of_family?.id ?? "",
+  //   amount: response.amount,
+  //   reason: response.reason,
+  //   bank: response.bank,
+  //   account_number: response.account_number,
+  //   proof: null,
+  //   proof_url: response.proof,
+  //   status: response.status,
+  // };
   socialAssistanceRecipient.value = response;
   socialAssistanceRecipient.value.proof_url =
     socialAssistanceRecipient.value.proof;
@@ -205,7 +218,9 @@ const formatToClientTimeZone = (date) => {
           <p
             class="font-semibold text-lg leading-[22.5px] text-desa-dark-green"
           >
-            {{ formatRupiah(socialAssistanceRecipient?.amount) }}
+            {{
+              formatRupiah(socialAssistanceRecipient?.social_assistance?.amount)
+            }}
           </p>
           <span class="font-medium text-desa-secondary">
             {{ socialAssistanceRecipient?.social_assistance?.category }}</span
@@ -386,7 +401,7 @@ const formatToClientTimeZone = (date) => {
             class="flex w-[120px] h-[60px] rounded-2xl border border-desa-background py-3 px-0.5 items-center justify-center bg-desa-blue/10 overflow-hidden"
           >
             <img
-              src="@/assets/images/logos/bca.svg"
+              src="@/assets/images/thumbnails/kk-bca.png"
               class="w-full h-full object-contain"
               alt="icon"
               v-if="socialAssistanceRecipient?.bank === 'bca'"
@@ -397,14 +412,14 @@ const formatToClientTimeZone = (date) => {
               alt="icon"
               v-if="socialAssistanceRecipient?.bank === 'bni'"
             />
-            <img
+            <!-- <img
               src="@/assets/images/logos/bri.png"
               class="w-full h-full object-contain"
               alt="icon"
               v-if="socialAssistanceRecipient?.bank === 'bri'"
-            />
+            /> -->
             <img
-              src="@/assets/images/logos/mandiri.png"
+              src="@/assets/images/thumbnails/kk-mandiri.png"
               class="w-full h-full object-contain"
               alt="icon"
               v-if="socialAssistanceRecipient?.bank === 'mandiri'"
@@ -542,7 +557,7 @@ const formatToClientTimeZone = (date) => {
               </div>
               <img
                 v-if="socialAssistanceRecipient.status === 'approved'"
-                :src="socialAssistanceRecipient.proof"
+                :src="socialAssistanceRecipient.proof_url"
                 alt="image"
                 class="bukti-menerima-bansos absolute left-0 top-0 w-full h-full object-cover"
               />

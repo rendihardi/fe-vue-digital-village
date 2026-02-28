@@ -8,6 +8,10 @@ import debounce from "lodash/debounce";
 import { RouterLink } from "vue-router";
 import { create } from "lodash";
 import { can } from "@/helpers/permissionHelper";
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
+
 const developmentStore = useDevelopmentStore();
 
 const { developments, meta, loading, error, success } =
@@ -22,6 +26,7 @@ const serverOptions = ref({
 
 const filters = ref({
   search: null,
+  status: null,
 });
 
 const fetchData = async () => {
@@ -52,7 +57,7 @@ watch(
   <div id="Header" class="flex items-center justify-between">
     <h1 class="font-semibold text-2xl">Pembangunan Desa</h1>
     <RouterLink
-      v-if="can('create development')"
+      v-if="can('development-create')"
       :to="{ name: 'create-development' }"
       class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-dark-green"
     >
@@ -82,6 +87,61 @@ watch(
       />
     </button>
   </div>
+  <div
+    v-if="error"
+    class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-2xl relative mb-4"
+    role="alert"
+  >
+    <span class="block sm:inline">{{ error }}</span>
+
+    <button
+      type="button"
+      @click="error = null"
+      class="absolute top-1/2 -translate-y-1/2 right-4"
+    >
+      <img
+        src="@/assets/images/icons/close-circle-white.svg"
+        class="flex size-6 shrink-0"
+        alt="icon"
+      />
+    </button>
+  </div>
+
+  <section
+    id="TabButtons"
+    class="w-full p-1 bg-desa-foreshadow rounded-full grid grid-cols-2 gap-3"
+    v-if="user.role === 'head-of-family'"
+  >
+    <button
+      type="button"
+      data-content="All"
+      :class="['tab-btn', 'group', { active: !filters.status }]"
+    >
+      <div
+        class="group-[.active]:bg-desa-dark-green group-[.active]:text-white rounded-full py-[18px] flex justify-center items-center"
+        @click="filters.status = null"
+      >
+        <span>Semua Pembangunan</span>
+      </div>
+    </button>
+
+    <button
+      type="button"
+      data-content="My-applications"
+      :class="[
+        'tab-btn',
+        'group',
+        { active: filters.status === 'my-applications' },
+      ]"
+    >
+      <div
+        class="group-[.active]:bg-desa-dark-green group-[.active]:text-white rounded-full py-[18px] flex justify-center items-center"
+        @click="filters.status = 'my-applications'"
+      >
+        <span>My Applications</span>
+      </div>
+    </button>
+  </section>
   <section id="List-Pembangunan-Desa" class="flex flex-col gap-[14px]">
     <form id="Page-Search" class="flex items-center justify-between">
       <div class="flex flex-col gap-3 w-[370px] shrink-0">

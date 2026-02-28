@@ -110,6 +110,7 @@ export const useDevelopmentApplicantStore = defineStore(
           this.loading = false;
         }
       },
+
       async deleteDevelopmentApplicant(id) {
         this.loading = true;
         try {

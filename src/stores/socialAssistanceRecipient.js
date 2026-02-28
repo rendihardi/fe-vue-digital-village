@@ -86,23 +86,56 @@ export const useSocialAssistanceRecipientStore = defineStore(
           this.loading = false;
         }
       },
+
+      // async updateSocialAssistanceRecipient(socialAssistanceRecipient) {
+      //   this.loading = true;
+      //   this.error = null;
+      //   this.success = null;
+      //   try {
+      //     const response = await axiosInstance.post(
+      //       `/social-assistance-recipient/${socialAssistanceRecipient.id}`,
+      //       {
+      //         ...socialAssistanceRecipient,
+      //         _method: "put",
+      //       },
+      //     );
+      //     this.success = response.data.message;
+      //     // router.push({
+      //     //   name: "manage-social-assistance",
+      //     //   params: { id: socialAssistanceRecipient.value.id },
+      //     // });
+      //     return true;
+      //   } catch (error) {
+      //     this.error = handleError(error);
+      //     return false;
+      //   } finally {
+      //     this.loading = false;
+      //   }
+      // },
+
       async updateSocialAssistanceRecipient(socialAssistance) {
         this.loading = true;
         this.error = null;
         this.success = null;
         try {
+          const formData = new FormData();
+          formData.append("_method", "PUT");
+
+          for (const key in socialAssistance) {
+            if (
+              socialAssistance[key] !== null &&
+              socialAssistance[key] !== undefined
+            ) {
+              formData.append(key, socialAssistance[key]);
+            }
+          }
+
           const response = await axiosInstance.post(
             `/social-assistance-recipient/${socialAssistance.id}`,
-            {
-              ...socialAssistance,
-              _method: "put",
-            },
+            formData,
           );
+
           this.success = response.data.message;
-          // router.push({
-          //   name: "manage-social-assistance",
-          //   params: { id: socialAssistance.value.id },
-          // });
           return true;
         } catch (error) {
           this.error = handleError(error);
@@ -111,6 +144,7 @@ export const useSocialAssistanceRecipientStore = defineStore(
           this.loading = false;
         }
       },
+
       async deleteSocialAssistanceRecipient(id) {
         this.loading = true;
         try {
