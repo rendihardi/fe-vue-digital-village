@@ -30,6 +30,7 @@ const sidebarItem = [
     iconActive: iconCrownActive,
     iconInactive: iconCrownInactive,
     permission: "family-member-menu",
+    role: "head-of-family",
   },
   {
     label: "Bantuan Sosial",

@@ -2,7 +2,8 @@
 import { RouterLink, RouterView } from "vue-router";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { can } from "@/helpers/permissionHelper.js";
+import { can, canRole } from "@/helpers/permissionHelper.js";
+
 const props = defineProps({
   item: {
     type: Object,
@@ -32,7 +33,7 @@ watch(isChildActive, () => {
   <li
     class="group"
     :class="{ active: isActive }"
-    v-if="!item.children && can(item.permission)"
+    v-if="!item.children && can(item.permission) && canRole(item.role)"
   >
     <RouterLink
       :to="item.path"

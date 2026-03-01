@@ -18,12 +18,13 @@ const {
   success: eventParticipantSuccess,
 } = storeToRefs(eventParticipantStore);
 
-const { createEventParticipant } = eventParticipantStore;
+const {
+  createEventParticipant,
+  getEventParticipantById,
+  updateEventParticipant,
+} = eventParticipantStore;
 
-const eventParticipant = ref({
-  event_id: "",
-  quantity: 1,
-});
+const eventParticipant = ref({});
 
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
@@ -31,30 +32,37 @@ const { user } = storeToRefs(authStore);
 const route = useRoute();
 const router = useRouter();
 
-const eventStore = useEventStore(); // ✅ BUAT DULU
+// const eventStore = useEventStore(); // ✅ BUAT DULU
 
-const { deleteEvent, getEventById } = eventStore;
-const { loading, error, success } = storeToRefs(eventStore);
+// const { deleteEvent, getEventById } = eventStore;
+// const { loading, error, success } = storeToRefs(eventStore);
 
-const event = ref({});
+// const event = ref({});
 const showModalDelete = ref(false);
 
 const fetchData = async () => {
-  const response = await getEventById(route.params.id);
-  event.value = response;
-  eventParticipant.value.event_id = response.id;
+  console.log("route.params.id:", route.params.id); // ← cek ini dulu
+  const response = await getEventParticipantById(route.params.id);
+  console.log("response:", response);
+  eventParticipant.value = response;
 };
+
 const showSuccessModal = ref(false);
 
 const handleSubmit = async () => {
-  const response = await createEventParticipant(eventParticipant.value);
-
-  window.snap.pay(response.snap_token, {
+  //   const response = await createEventParticipant(eventParticipant.value);
+  const response = eventParticipant.value.snap_token;
+  if (!response) {
+    alert("Pembeyaran tidak ditemukan, silahkan buat order ulang");
+    return;
+  }
+  window.snap.pay(response, {
     onSuccess: function (result) {
       /* You may add your own implementation here */
       showSuccessModal.value = true;
-      eventParticipant.value.quantity = 0;
-      eventParticipant.value.total_price = 0;
+      fetchData();
+      //   eventParticipant.value.quantity = 0;
+      //   eventParticipant.value.total_price = 0;
     },
     onPending: function (result) {
       /* You may add your own implementation here */
@@ -66,10 +74,6 @@ const handleSubmit = async () => {
     },
     onClose: function () {
       /* You may add your own implementation here */
-      router.push({
-        name: "manage-event-participant",
-        params: { id: response.id },
-      });
     },
   });
 };
@@ -84,43 +88,10 @@ onMounted(() => {
   fetchData();
 });
 
-async function handleDelete() {
-  await deleteEvent(route.params.id);
-  router.push({ name: "event" });
-}
-const decrementQuantity = () => {
-  if (eventParticipant.value.quantity > 1) {
-    eventParticipant.value.quantity -= 1;
-  }
-  eventParticipant.value.total_price = formatRupiah(
-    eventParticipant.value.quantity * event.value.price,
-  );
-};
-
-const incrementQuantity = () => {
-  eventParticipant.value.quantity += 1;
-  eventParticipant.value.total_price = formatRupiah(
-    eventParticipant.value.quantity * event.value.price,
-  );
-};
-
-import { computed } from "vue";
-
-const totalPrice = computed(() => {
-  if (!event.value?.price) return 0;
-  return eventParticipant.value.quantity * event.value.price;
-});
-
-// const formatRupiah = (value) => {
-//   return new Intl.NumberFormat("id-ID", {
-//     style: "currency",
-//     currency: "IDR",
-//   }).format(value);
-// };
-
-// const formatToClientTimeZone = (date) => {
-//   return dayjs(date).format("DD MMMM YYYY, HH:mm");
-// };
+// async function handleDelete() {
+//   await deleteEvent(route.params.id);
+//   router.push({ name: "event" });
+// }
 </script>
 
 <template>
@@ -136,25 +107,13 @@ const totalPrice = computed(() => {
         <p
           class="last-of-type:text-desa-dark-green last-of-type:font-semibold capitalize"
         >
-          Detail Event Desa
+          Detail Pemesanan Event Desa
         </p>
       </div>
-      <h1 class="font-semibold text-2xl">Detail Event Desa</h1>
+      <h1 class="font-semibold text-2xl">Detail Pemesanan Event Desa</h1>
     </div>
-    <RouterLink
-      v-if="can('event-edit')"
-      :to="{ name: 'edit-event', params: { id: event.id } }"
-      class="flex items-center rounded-2xl py-4 px-6 gap-[10px] bg-desa-black"
-    >
-      <p class="font-medium text-white">Ubah Data</p>
-      <img
-        src="@/assets/images/icons/edit-white.svg"
-        class="flex size-6 shrink-0"
-        alt="icon"
-      />
-    </RouterLink>
   </div>
-  <div
+  <!-- <div
     v-if="success"
     class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-2xl relative mb-4"
     role="alert"
@@ -171,7 +130,7 @@ const totalPrice = computed(() => {
         alt="icon"
       />
     </button>
-  </div>
+  </div> -->
   <div class="flex gap-[14px]">
     <section
       id="Informasi"
@@ -183,14 +142,14 @@ const totalPrice = computed(() => {
           class="flex w-[100px] h-20 shrink-0 rounded-2xl overflow-hidden bg-desa-foreshadow"
         >
           <img
-            :src="event.thumbnail"
+            :src="eventParticipant?.event?.thumbnail"
             class="w-full h-full object-cover"
             alt="photo"
           />
         </div>
         <div class="flex flex-col gap-[6px] w-full ml-4 mr-9">
           <p class="font-semibold text-lg leading-[22.5px] line-clamp-1">
-            {{ event.name }}
+            {{ eventParticipant?.event?.name }}
           </p>
           <div class="flex items-center gap-1">
             <img
@@ -202,13 +161,13 @@ const totalPrice = computed(() => {
               Registration:
               <span
                 class="font-medium text-base text-desa-dark-green"
-                v-if="event.is_active === 1"
+                v-if="eventParticipant?.event?.is_active === 1"
               >
                 Open
               </span>
               <span
                 class="font-medium text-base text-desa-dark-red"
-                v-if="event.is_active === 0"
+                v-if="eventParticipant?.event?.is_active === 0"
               >
                 Close
               </span>
@@ -229,13 +188,13 @@ const totalPrice = computed(() => {
         </div>
         <div class="flex flex-col gap-1 w-full">
           <p class="font-semibold text-lg leading-[22.5px] text-desa-red">
-            Rp{{ formatRupiah(event.price) }}
+            Rp{{ formatRupiah(eventParticipant?.event?.price) }}
           </p>
           <span class="font-medium text-desa-secondary"> Harga Event </span>
         </div>
       </div>
       <hr class="border-desa-foreshadow" />
-      <div class="flex items-center w-full gap-3">
+      <!-- <div class="flex items-center w-full gap-3">
         <div
           class="flex size-[52px] shrink-0 rounded-2xl bg-desa-blue/10 items-center justify-center"
         >
@@ -247,13 +206,13 @@ const totalPrice = computed(() => {
         </div>
         <div class="flex flex-col gap-1 w-full">
           <p class="font-semibold text-lg leading-[22.5px] text-desa-blue">
-            {{ event.event_participants?.length ?? 0 }} Warga
+            {{ eventParticipant?.event?.event_participants?.length ?? 0 }} Warga
           </p>
           <span class="font-medium text-desa-secondary">
             Total Partisipasi
           </span>
         </div>
-      </div>
+      </div> -->
       <hr class="border-desa-foreshadow" />
       <div class="flex items-center w-full gap-3">
         <div
@@ -269,7 +228,7 @@ const totalPrice = computed(() => {
           <p
             class="font-semibold text-lg leading-[22.5px] text-desa-dark-green"
           >
-            {{ formatDate(event.date) }}
+            {{ formatDate(eventParticipant?.event?.date) }}
           </p>
           <span class="font-medium text-desa-secondary">
             Tanggal Pelaksaaan
@@ -289,7 +248,7 @@ const totalPrice = computed(() => {
         </div>
         <div class="flex flex-col gap-1 w-full">
           <p class="font-semibold text-lg leading-[22.5px] text-desa-yellow">
-            {{ event.time }} WIB
+            {{ eventParticipant?.event?.time }} WIB
           </p>
           <span class="font-medium text-desa-secondary">
             Tanggal Pelaksaaan
@@ -300,55 +259,9 @@ const totalPrice = computed(() => {
       <div class="flex flex-col gap-3">
         <p class="font-medium text-sm text-desa-secondary">Tentang Event</p>
         <p class="font-medium leading-8">
-          {{ event.description }}
+          {{ eventParticipant?.event?.description }}
         </p>
       </div>
-    </section>
-    <section
-      v-if="user.role === 'admin'"
-      id="Participants"
-      class="flex flex-col flex-1 h-fit shrink-0 rounded-3xl p-6 gap-6 bg-white"
-    >
-      <p class="font-medium leading-5 text-desa-secondary">
-        Latest Participants
-      </p>
-      <div
-        class="flex flex-col gap-[14px]"
-        v-for="participant in event?.event_participants"
-      >
-        <div class="flex items-center gap-3 w-[302px] shrink-0">
-          <div
-            class="flex size-[54px] rounded-full bg-desa-foreshadow overflow-hidden"
-          >
-            <img
-              src="@/assets/images/photos/kk-photo-1.png"
-              class="w-full h-full object-cover"
-              alt="icon"
-            />
-          </div>
-          <div class="flex flex-col gap-1">
-            <p class="font-semibold text-lg leading-5 text-desa-black">
-              {{ participant.head_of_family?.user?.name }}
-            </p>
-            <p class="flex items-center gap-1">
-              <img
-                src="@/assets/images/icons/briefcase-secondary-green.svg"
-                class="flex size-[18px] shrink-0"
-                alt="icon"
-              />
-              <span class="font-medium text-sm text-desa-secondary">{{
-                participant.head_of_family?.occupation
-              }}</span>
-            </p>
-          </div>
-        </div>
-      </div>
-      <a
-        href="#"
-        class="flex items-center justify-center h-14 rounded-2xl py-4 px-6 gap-[10px] bg-desa-dark-green"
-      >
-        <span class="font-medium leading-5 text-white">View All</span>
-      </a>
     </section>
     <section
       v-if="user.role === 'head-of-family'"
@@ -357,11 +270,32 @@ const totalPrice = computed(() => {
     >
       <form @submit.prevent="handleSubmit" class="flex-1">
         <div class="flex flex-col h-fit gap-6 rounded-2xl bg-white py-6 flex-1">
-          <h2
-            class="font-medium text-sm leading-[17.5px] text-desa-secondary px-6"
-          >
-            Detail Pembayaran
-          </h2>
+          <div class="flex items-center justify-between px-6">
+            <h2
+              class="font-medium text-sm leading-[17.5px] text-desa-secondary"
+            >
+              Detail Pembayaran
+            </h2>
+
+            <!-- STATUS -->
+            <div>
+              <span
+                v-if="eventParticipant.payment_status === 'unpaid'"
+                class="flex rounded-full py-[12px] w-[100px] justify-center bg-desa-yellow text-white font-semibold text-xs leading-[15px] shrink-0"
+                >UNPAID</span
+              >
+              <span
+                v-if="eventParticipant.payment_status === 'cancelled'"
+                class="flex rounded-full py-[12px] w-[100px] justify-center bg-desa-red text-white font-semibold text-xs leading-[15px] shrink-0"
+                >CANCELLED</span
+              >
+              <span
+                v-if="eventParticipant.payment_status === 'paid'"
+                class="flex rounded-full py-[12px] w-[100px] justify-center bg-desa-dark-green text-white font-semibold text-xs leading-[15px] shrink-0"
+                >PAID</span
+              >
+            </div>
+          </div>
           <section
             id="Harga-Event"
             class="flex items-center justify-between px-6"
@@ -376,7 +310,7 @@ const totalPrice = computed(() => {
               </div>
               <div class="flex flex-col gap-1">
                 <p class="font-semibold text-lg leading-[22.5px] text-desa-red">
-                  Rp{{ formatRupiah(event.price) }}
+                  Rp{{ formatRupiah(eventParticipant?.event?.price) }}
                 </p>
                 <h3
                   class="font-medium text-sm leading-[17.5px] text-desa-secondary"
@@ -384,39 +318,6 @@ const totalPrice = computed(() => {
                   Harga Event
                 </h3>
               </div>
-            </div>
-            <div
-              id="CountButton"
-              class="py-3 px-4 rounded-2xl border border-desa-background flex items-center gap-3"
-            >
-              <button
-                type="button"
-                id="decrementBtn"
-                @click="decrementQuantity"
-              >
-                <img
-                  src="@/assets/images/icons/minus-square-secondary-green.svg"
-                  alt="icon"
-                  class="size-6 shrink-0"
-                />
-              </button>
-              <p
-                id="counterValue"
-                class="font-medium text-[22px] leading-[27.5px] text-center text-[#000000]"
-              >
-                {{ eventParticipant.quantity }}
-              </p>
-              <button
-                type="button"
-                id="incrementBtn"
-                @click="incrementQuantity"
-              >
-                <img
-                  src="@/assets/images/icons/add-square-secondary-green.svg"
-                  alt="icon"
-                  class="size-6 shrink-0"
-                />
-              </button>
             </div>
           </section>
           <hr class="border-desa-background" />
@@ -457,7 +358,7 @@ const totalPrice = computed(() => {
                 </h4>
               </div>
               <p class="font-semibold text-lg leading-[22.5px]">
-                {{ eventParticipant.quantity }}x warga
+                {{ eventParticipant?.quantity }}x orang
               </p>
             </div>
             <hr class="border-desa-background" />
@@ -479,16 +380,21 @@ const totalPrice = computed(() => {
                 name="harga_total"
                 class="font-semibold text-lg leading-[22.5px] text-right focus:outline-none"
                 readonly
-                :value="formatRupiah(totalPrice)"
               />
+              <p
+                class="font-semibold text-lg leading-[22.5px] text-right focus:outline-none"
+              >
+                {{ formatRupiah(eventParticipant?.total_price) }}
+              </p>
             </label>
             <hr class="border-desa-background" />
           </section>
           <button
+            v-if="eventParticipant.payment_status === 'unpaid'"
             type="submit"
             class="bg-desa-dark-green mx-6 rounded-2xl py-[18px] flex justify-center items-center text-center text-white font-medium leading-5"
           >
-            Purchase Ticket
+            Bayar Sekarang
           </button>
         </div>
       </form>

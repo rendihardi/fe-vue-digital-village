@@ -54,11 +54,12 @@ const {
 const fetchData = async () => {
   const response = await getDevelopmentById(route.params.id);
   development.value = response;
+  formUpdate.value.development_id = response.id;
 };
 
 const setStatusAndSubmit = async (applicant, status) => {
   formUpdate.value.id = applicant.id; // penting untuk update
-  formUpdate.value.development_id = development.value.id;
+  // formUpdate.value.development_id = development.value.id;
   formUpdate.value.user_id = applicant.user?.id;
   formUpdate.value.status = status;
 
@@ -95,9 +96,7 @@ async function handleUpdateSubmit() {
 }
 
 async function handleSubmit() {
-  const successCreate = await createDevelopmentApplicant(
-    developmentApplicant.value,
-  );
+  const successCreate = await createDevelopmentApplicant(formUpdate.value);
   showSelectApplicant.value = false;
   if (successCreate) {
     router.push({
@@ -113,8 +112,8 @@ const selectedUser = ref({
 
 const handleSelectApplicant = (user) => {
   selectedUser.value = user;
-  developmentApplicant.value.user_id = user.id;
-  showSelectApplicant.value = false;
+  formUpdate.value.user_id = user.id; // ✅ pakai ini
+  showSelectApplicant.value = false; // ✅ modal close
 };
 </script>
 
@@ -458,6 +457,11 @@ const handleSelectApplicant = (user) => {
                     {{ applicant.user?.name }}
                   </p>
                 </div>
+              </div>
+              <div class="flex flex-col gap-1">
+                <p class="font-semibold text-lg leading-5 text-desa-black">
+                  {{ applicant.user?.email }}
+                </p>
               </div>
               <div
                 class="flex items-center gap-3 justify-end shrink-0"

@@ -591,13 +591,24 @@ const formatToClientTimeZone = (date) => {
                 </div>
               </label>
               <button
+                v-if="socialAssistance.is_available"
                 :disabled="loadingSocialAssistanceRecipient"
-                id="submitButton"
                 type="submit"
                 class="py-[18px] rounded-2xl disabled:bg-desa-grey w-[180px] text-center flex justify-center font-medium text-white bg-desa-dark-green transition-all duration-300"
               >
                 <span v-if="!loadingSocialAssistanceRecipient">Ajukan</span>
-                <span v-else>loding...</span>
+                <span v-else>Loading...</span>
+                <!-- ✅ pakai v-else, bukan v-if duplikat -->
+              </button>
+
+              <button
+                v-if="!socialAssistance.is_available"
+                disabled
+                type="button"
+                class="py-[18px] rounded-2xl w-[180px] text-center flex justify-center font-medium text-white bg-desa-dark-grey cursor-not-allowed"
+                style="background-color: grey"
+              >
+                Tidak Tersedia
               </button>
             </section>
           </div>

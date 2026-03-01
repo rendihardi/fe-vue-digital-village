@@ -67,7 +67,7 @@ export const useEventParticipantStore = defineStore("event-participant", {
       try {
         const response = await axiosInstance.post("/event-participant", event);
         this.success = response.data.message;
-        return true;
+        return response.data.data;
         // router.router.push({ name: "event" });
       } catch (error) {
         this.error = handleError(error);
@@ -76,6 +76,7 @@ export const useEventParticipantStore = defineStore("event-participant", {
         this.loading = false;
       }
     },
+
     async updateEventParticipant(event) {
       this.loading = true;
       this.error = null;

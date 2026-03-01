@@ -28,6 +28,7 @@ import ProfileCreate from "@/views/profile/ProfileCreate.vue";
 import FamilyMember from "@/views/family-member/FamilyMember.vue";
 import FamilyMemberManage from "@/views/family-member/FamilyMemberManage.vue";
 import FamilyMemberCreate from "@/views/family-member/FamilyMemberCreate.vue";
+import EventParticipantManage from "@/views/event-participant/EventParticipantManage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -154,6 +155,15 @@ const router = createRouter({
           meta: {
             requiresAuth: true,
             permission: "event-list",
+          },
+        },
+        {
+          path: "/event-participant/:id",
+          name: "manage-event-participant",
+          component: EventParticipantManage,
+          meta: {
+            requiresAuth: true,
+            permission: "event-participant-list",
           },
         },
         {

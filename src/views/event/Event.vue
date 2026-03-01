@@ -8,6 +8,23 @@ import debounce from "lodash/debounce";
 import { RouterLink } from "vue-router";
 import { create } from "lodash";
 import { can } from "@/helpers/permissionHelper";
+import { useEventParticipantStore } from "@/stores/eventParticipant";
+import CardListJoined from "@/components/event/CardListJoined.vue";
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
+
+const eventParticipantStore = useEventParticipantStore();
+const {
+  eventParticipants,
+  loading: loadingEventParticipant,
+  error: errorEventParticipant,
+  success: successEventParticipant,
+  meta: metaEventParticipant,
+} = storeToRefs(eventParticipantStore);
+
+const { fetchEventParticipantPaginated } = eventParticipantStore;
+
 const eventStore = useEventStore();
 
 const { events, meta, loading, error, success } = storeToRefs(eventStore);
@@ -21,13 +38,21 @@ const serverOptions = ref({
 
 const filters = ref({
   search: null,
+  status: null,
 });
 
 const fetchData = async () => {
-  await fetchEventPaginated({
-    ...serverOptions.value,
-    ...filters.value,
-  });
+  if (filters.value.status === "joined") {
+    await fetchEventParticipantPaginated({
+      ...serverOptions.value,
+      ...filters.value,
+    });
+  } else {
+    await fetchEventPaginated({
+      ...serverOptions.value,
+      ...filters.value,
+    });
+  }
 };
 
 const debounceFetchData = debounce(fetchData, 500);
@@ -81,6 +106,38 @@ watch(
       />
     </button>
   </div>
+
+  <section
+    id="TabButtons"
+    class="w-full p-1 bg-desa-foreshadow rounded-full grid grid-cols-2 gap-3"
+    v-if="user.role === 'head-of-family'"
+  >
+    <button
+      type="button"
+      data-content="All"
+      :class="['tab-btn', 'group', { active: !filters.status }]"
+    >
+      <div
+        class="group-[.active]:bg-desa-dark-green group-[.active]:text-white rounded-full py-[18px] flex justify-center items-center"
+        @click="filters.status = null"
+      >
+        <span>Semua Event</span>
+      </div>
+    </button>
+
+    <button
+      type="button"
+      data-content="joined"
+      :class="['tab-btn', 'group', { active: filters.status === 'joined' }]"
+    >
+      <div
+        class="group-[.active]:bg-desa-dark-green group-[.active]:text-white rounded-full py-[18px] flex justify-center items-center"
+        @click="filters.status = 'joined'"
+      >
+        <span>Joined</span>
+      </div>
+    </button>
+  </section>
   <section id="List-Event-Desa" class="flex flex-col gap-[14px]">
     <form id="Page-Search" class="flex items-center justify-between">
       <div class="flex flex-col gap-3 w-[370px] shrink-0">
@@ -148,7 +205,15 @@ watch(
       v-for="event in events"
       :key="event.id"
       :item="event"
-      v-if="!loading"
+      v-if="!loading && filters.status !== 'joined'"
+    />
+
+    <!-- Joined Event -->
+    <CardListJoined
+      v-if="!loading && filters.status === 'joined'"
+      v-for="item in eventParticipants"
+      :key="item.id"
+      :item="item"
     />
   </section>
   <Pagination :meta="meta" :serverOptions="serverOptions" />

@@ -9,6 +9,19 @@ import { RouterLink } from "vue-router";
 import { create } from "lodash";
 import { can } from "@/helpers/permissionHelper";
 import { useAuthStore } from "@/stores/auth";
+import { useDevelopmentApplicantStore } from "@/stores/developmentApplicant";
+import CardListApplicant from "@/components/development/CardListApplicant.vue";
+
+const developmentApplicantStore = useDevelopmentApplicantStore();
+const {
+  developmentApplicants,
+  loading: developmentApplicantLoading,
+  error: developmentApplicantError,
+  success: developmentApplicantSuccess,
+  meta: developmentApplicantMeta,
+} = storeToRefs(developmentApplicantStore);
+const { fetchDevelopmentApplicantPaginated } = developmentApplicantStore;
+
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 
@@ -30,10 +43,17 @@ const filters = ref({
 });
 
 const fetchData = async () => {
-  await fetchDevelopmentPaginated({
-    ...serverOptions.value,
-    ...filters.value,
-  });
+  if (filters.value.status === "my-applications") {
+    await fetchDevelopmentApplicantPaginated({
+      ...serverOptions.value,
+      ...filters.value,
+    });
+  } else {
+    await fetchDevelopmentPaginated({
+      ...serverOptions.value,
+      ...filters.value,
+    });
+  }
 };
 
 const debounceFetchData = debounce(fetchData, 500);
@@ -209,8 +229,23 @@ watch(
       v-for="development in developments"
       :key="development.id"
       :item="development"
-      v-if="!loading"
+      v-if="!loading && filters.status !== 'my-applications'"
+    />
+
+    <!-- Joined Event -->
+    <CardListApplicant
+      v-if="
+        !developmentApplicantLoading && filters.status === 'my-applications'
+      "
+      v-for="applicant in developmentApplicants"
+      :key="applicant.id"
+      :item="applicant"
     />
   </section>
-  <Pagination :meta="meta" :serverOptions="serverOptions" />
+  <Pagination
+    :meta="
+      filters.status === 'my-applications' ? developmentApplicantMeta : meta
+    "
+    :serverOptions="serverOptions"
+  />
 </template>

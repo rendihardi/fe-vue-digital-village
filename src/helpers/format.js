@@ -17,7 +17,12 @@ export function parseRupiah(value) {
 export function formatPercentage(value) {
   return numeral(value).format("0,0.[.]00%");
 }
+export function formatTime(time) {
+  if (!time) return "-";
 
+  const [hour, minute] = time.split(":");
+  return `${hour}:${minute}`;
+}
 export function formatDate(date) {
   const options = { day: "numeric", month: "long", year: "numeric" };
 

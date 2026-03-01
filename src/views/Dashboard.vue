@@ -1022,14 +1022,14 @@ watch(
             </div>
           </div>
           <hr class="border-desa-background" />
+          <h3 class="font-medium leading-5 text-desa-secondary">
+            Recent Events
+          </h3>
           <div
             id="Recent-Event"
             class="flex flex-col gap-4"
             v-for="event in eventParticipants.slice(0, 3)"
           >
-            <h3 class="font-medium leading-5 text-desa-secondary">
-              Recent Events
-            </h3>
             <div
               class="event py-4 rounded-2xl border border-desa-background flex flex-col gap-4"
             >
