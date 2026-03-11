@@ -26,7 +26,6 @@ const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 
 const developmentStore = useDevelopmentStore();
-
 const { developments, meta, loading, error, success } =
   storeToRefs(developmentStore);
 
