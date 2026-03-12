@@ -1,0 +1,36 @@
+name: Deploy Vue
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd /www/wwwroot/mydigitalvillage.my.id
+
+            git config --global --add safe.directory /www/wwwroot/mydigitalvillage.my.id
+
+            echo "Pull latest code"
+            git fetch origin master
+            git reset --hard origin/master
+
+            echo "Install dependencies"
+            npm install
+
+            echo "Build"
+            npm run build
+
+            echo "Fix permission"
+            sudo chown -R www:www .
+            sudo chmod -R 755 dist
