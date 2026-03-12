@@ -4,7 +4,7 @@ import router from "@/router";
 
 // Buat instance (lebih clean daripada pakai axios global)
 export const axiosInstance = axios.create({
-  baseURL: "https://api.mydigitalvillage.my.id/",
+  baseURL: "https://api.mydigitalvillage.my.id/api",
   headers: {
     "X-Requested-With": "XMLHttpRequest",
     Accept: "application/json",
